@@ -1,1043 +1,2549 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="light">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدير المهام الجامعية الذكي | UniTask Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loft Up - Smart Coffee Shop Management System</title>
+  
+  <!-- Fonts: Cairo & Inter for modern coffee typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tone.js for soft audio cues -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            loft: {
+              50: '#fbf8f5',
+              100: '#f5efe9',
+              200: '#ebdcd0',
+              300: '#dbc0ad',
+              400: '#c59d83',
+              500: '#b17e5f',
+              600: '#9b664d',
+              700: '#7e503e',
+              800: '#674235',
+              900: '#3d251d',
+              950: '#23140e'
+            },
+            caramel: {
+              light: '#fef3c7',
+              DEFAULT: '#d97706',
+              dark: '#92400e'
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'Inter', 'sans-serif'],
+            mono: ['Courier New', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
     
-    <!-- خط القاهرة والخط الكوفي الحديث من Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Alexandria:wght@400;600;700&display=swap" rel="stylesheet">
+    /* Custom Modern Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c59d83;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9b664d;
+    }
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    /* Thermal Receipt Print Styles */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #print-receipt-section, #print-receipt-section * {
+        visibility: visible !important;
+      }
+      #print-receipt-section {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
+        padding: 8px !important;
+        margin: 0 auto !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+    }
 
-    <!-- Canvas Confetti للاحتفال بالإنجاز -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Cairo', 'sans-serif'],
-                        display: ['Alexandria', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            200: '#c7d2fe',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                        },
-                        emeraldCustom: '#10b981',
-                        surfaceDark: '#0f172a',
-                        cardDark: '#1e293b',
-                        borderDark: '#334155',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        /* أنماط وتأثيرات بصرية حركية */
-        * {
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .heading-font {
-            font-family: 'Alexandria', 'Cairo', sans-serif;
-        }
-
-        /* تخصيص شريط التمرير */
-        ::-webkit-scrollbar {
-            width: 7px;
-            height: 7px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-
-        /* حركات التلاشي والظهور المنساب */
-        @keyframes slideDownFade {
-            from {
-                opacity: 0;
-                transform: translateY(-16px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .animate-enter {
-            animation: slideDownFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* حركات التلميح العائم الانسيابية والديناميكية */
-        @keyframes floatingEnter {
-            0% {
-                opacity: 0;
-                transform: translateY(45px) scale(0.92);
-            }
-            65% {
-                opacity: 1;
-                transform: translateY(-5px) scale(1.01);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes floatingExit {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(35px) scale(0.92);
-            }
-        }
-
-        /* طفو بطيء وخفيف يمنح لمسة حيوية للتلميح */
-        @keyframes softBobbing {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-4px);
-            }
-        }
-
-        .floating-hint-enter {
-            animation: floatingEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .floating-hint-exit {
-            animation: floatingExit 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        .floating-bobbing {
-            animation: softBobbing 5s ease-in-out infinite;
-        }
-
-        /* نبض ناعم للتنبيه الحالي */
-        @keyframes subtlePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        .pulse-active {
-            animation: subtlePulse 2s infinite ease-in-out;
-        }
-    </style>
+    /* Pulse Glow */
+    .glow-caramel {
+      box-shadow: 0 0 15px rgba(217, 119, 6, 0.25);
+    }
+    
+    .badge-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.05); }
+    }
+  </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 dark:bg-surfaceDark dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col justify-between">
+<body class="bg-loft-50 text-slate-800 dark:bg-[#15100d] dark:text-slate-100 min-h-screen flex flex-col antialiased selection:bg-loft-500 selection:text-white">
 
-    <!-- الحاوية الرئيسية للتطبيق -->
-    <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 flex-1">
-        
-        <!-- الشريط العلوي الترويسي الأكاديمي المطور -->
-        <header class="bg-white/80 dark:bg-cardDark/80 backdrop-blur-md border border-slate-200/80 dark:border-borderDark rounded-3xl p-5 sm:p-6 mb-8 shadow-sm">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-                <!-- هوية المنصة الجامعية -->
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-blue-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-brand-500/25 shrink-0 ring-4 ring-brand-50 dark:ring-brand-950/50">
-                        🎓
-                    </div>
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <h1 class="heading-font text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                منصة إنجاز الجامعية
-                            </h1>
-                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                المنظّم الذكي
-                            </span>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                الفصل الأكاديمي النشط
-                            </span>
-                        </div>
-                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                            نظام متكامل لجدولة المحاضرات، إدارة الواجبات، ومتابعة التحصيل الدراسي بتفوق
-                        </p>
-                    </div>
-                </div>
-
-                <!-- الأدوات وعناصر التحكم بالتاريخ والمظهر -->
-                <div class="flex flex-wrap items-center justify-between lg:justify-end gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-borderDark">
-                    <!-- كبسولة التاريخ الحالي -->
-                    <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-borderDark text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        <span>🗓️</span>
-                        <span id="currentDateDisplay">جاري التحميل...</span>
-                    </div>
-
-                    <!-- زر تفعيل/كتم الصوت التنبيهي -->
-                    <button id="soundToggleBtn" onclick="toggleAudio()" title="تبديل صوت التنبيهات" 
-                            class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-borderDark text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 transition-all flex items-center gap-2 text-xs font-semibold shadow-xs">
-                        <span id="soundIcon">🔔</span>
-                        <span id="soundText">الصوت مُفعل</span>
-                    </button>
-
-                    <!-- زر تبديل الوضع (النهاري الافتراضي / الليلي) -->
-                    <button id="themeToggleBtn" onclick="toggleTheme()" title="تبديل بين الوضع النهاري والليلي"
-                            class="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-borderDark text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 transition-all flex items-center gap-2 text-xs font-semibold shadow-xs">
-                        <span id="themeIcon">🌙</span>
-                        <span id="themeText">الوضع الليلي</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- مؤشرات الإنجاز الأكاديمي السريع -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
-                <div class="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">إجمالي المهام</div>
-                <div id="statTotal" class="heading-font text-2xl font-bold text-slate-800 dark:text-slate-100">0</div>
-            </div>
-            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
-                <div class="text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-1">المهام المنجزة</div>
-                <div id="statCompleted" class="heading-font text-2xl font-bold text-emerald-600 dark:text-emerald-400">0</div>
-            </div>
-            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
-                <div class="text-amber-600 dark:text-amber-400 text-xs font-semibold mb-1">قيد الانتظار / التنفيذ</div>
-                <div id="statPending" class="heading-font text-2xl font-bold text-amber-600 dark:text-amber-400">0</div>
-            </div>
-            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                    <span>نسبة الإنجاز</span>
-                    <span id="statPercentText" class="font-bold text-brand-600 dark:text-brand-400">0%</span>
-                </div>
-                <div class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-full h-2.5 overflow-hidden">
-                    <div id="statProgressBar" class="bg-brand-600 dark:bg-brand-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                </div>
-            </div>
+  <!-- Top Sticky Navigation & Live Status Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-loft-950/95 backdrop-blur border-b border-loft-200 dark:border-loft-900 shadow-sm transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Offline indicator -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-loft-700 via-loft-800 to-loft-950 flex items-center justify-center text-amber-300 shadow-md transform hover:rotate-6 transition">
+          <i class="fa-solid fa-mug-hot text-xl"></i>
         </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black tracking-tight text-loft-900 dark:text-amber-100 flex items-center gap-1.5">
+              LOFT UP <span class="text-xs px-2 py-0.5 rounded-full bg-caramel/15 text-caramel dark:bg-amber-400/20 dark:text-amber-300 font-bold">COFFEE</span>
+            </h1>
+            <span id="network-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="txt-online-status">متصل (أونلاين)</span>
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400" id="txt-brand-subtitle">نظام الإدارة الشامل والعمليات السحابية والمحلية</p>
+        </div>
+      </div>
 
-        <!-- قسم إضافة مهمة جديدة مع الجدول الزمني -->
-        <section class="bg-white dark:bg-cardDark rounded-3xl border border-slate-200 dark:border-borderDark p-5 sm:p-6 shadow-sm mb-8">
-            <h2 class="heading-font text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-brand-500 inline-block"></span>
-                <span>إدراج مهمة دراسية جديدة</span>
-            </h2>
+      <!-- Live Synchronized Digital Clock -->
+      <div class="flex items-center bg-loft-100 dark:bg-loft-900/80 px-4 py-1.5 rounded-2xl border border-loft-200 dark:border-loft-800 shadow-inner">
+        <div class="flex items-center gap-2.5 text-loft-900 dark:text-amber-200">
+          <i class="fa-regular fa-clock text-loft-600 dark:text-amber-400 text-base animate-spin" style="animation-duration: 12s;"></i>
+          <div class="text-right rtl:text-right ltr:text-left">
+            <span id="live-digital-clock" class="font-mono text-base font-bold tracking-wider">00:00:00</span>
+            <span id="live-digital-date" class="block text-[10px] text-slate-500 dark:text-slate-400 leading-tight">--</span>
+          </div>
+        </div>
+      </div>
 
-            <form id="taskForm" onsubmit="handleAddTask(event)" class="space-y-4">
-                <!-- عنوان المهمة والتصنيف الدراسي -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">عنوان المهمة أو الواجب الدراسي</label>
-                        <input type="text" id="taskTitle" required placeholder="مثال: حل مسائل تفاضل وتكامل 2 / مراجعة شبكات الحاسوب"
-                               class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">المادة / المجال</label>
-                        <input type="text" id="taskCourse" placeholder="مثال: ذكاء اصطناعي، فيزياء..." 
-                               class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
-                    </div>
-                </div>
+      <!-- Controls: Visitor Counter, Cash Quick View, Language, Theme -->
+      <div class="flex items-center gap-2 flex-wrap">
+        
+        <!-- 24h Visitors Button/Badge -->
+        <button onclick="app.openVisitorModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800/60 text-xs font-bold transition shadow-sm" title="احصائية الزبائن خلال 24 ساعة">
+          <i class="fa-solid fa-users"></i>
+          <span id="txt-visitors-counter-btn">زوار 24س:</span>
+          <span id="badge-visitor-count" class="bg-amber-500 text-white dark:bg-amber-600 px-1.5 py-0.5 rounded-md text-[11px]">42</span>
+        </button>
 
-                <!-- الأوقات والأولوية -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                            <span>وقت البداية</span>
-                            <span class="text-[11px] text-brand-600 dark:text-brand-400 font-normal">⏰ موعد التذكير</span>
-                        </label>
-                        <input type="time" id="taskStartTime" required
-                               class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
-                    </div>
+        <!-- Complaints & Feedback Button -->
+        <button onclick="app.openFeedbackModal()" class="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/60 border border-purple-200 dark:border-purple-800/60 text-xs font-bold transition shadow-sm" title="شكاوى وآراء الزبائن">
+          <i class="fa-regular fa-comments"></i>
+          <span id="txt-feedback-btn">الآراء والشكاوى</span>
+          <span id="badge-complaints-count" class="w-2 h-2 rounded-full bg-rose-500"></span>
+        </button>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between">
-                            <span>وقت النهاية</span>
-                            <span class="text-[11px] text-red-500 font-normal">⏳ مهلة الإنجاز</span>
-                        </label>
-                        <input type="time" id="taskEndTime" required
-                               class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
-                    </div>
+        <!-- Cash In/Out Summary Button -->
+        <button onclick="app.switchTab('cashflow')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/60 text-xs font-bold transition shadow-sm">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span id="txt-finance-balance-btn">الخزينة:</span>
+          <span id="header-balance-amount" class="font-mono font-bold">0 ₪</span>
+        </button>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">درجة الأهمية / الأولوية</label>
-                        <select id="taskPriority" 
-                                class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition cursor-pointer">
-                            <option value="high">🔴 أولوية قصوى (عاجل وهام)</option>
-                            <option value="medium" selected>🟡 أولوية متوسطة (اعتيادي)</option>
-                            <option value="low">🟢 أولوية مرنة (مراجعة وقراءة)</option>
-                        </select>
-                    </div>
-                </div>
+        <!-- Offline Mode Toggle for Testing -->
+        <button onclick="app.toggleOfflineSimulation()" id="btn-toggle-offline" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-loft-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-loft-800 transition" title="اختبار وضع انقطاع الانترنت">
+          <i class="fa-solid fa-wifi"></i>
+        </button>
 
-                <!-- زر الحفظ والإضافة -->
-                <div class="pt-2 flex justify-end">
-                    <button type="submit" 
-                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-98 text-white font-bold text-sm shadow-md shadow-brand-500/20 hover:shadow-lg transition flex items-center justify-center gap-2">
-                        <span>➕</span>
-                        <span>إدراج في جدول اليوم</span>
-                    </button>
-                </div>
-            </form>
-        </section>
+        <!-- Language Switcher (Ar / En) -->
+        <button onclick="app.toggleLanguage()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-loft-100 dark:bg-loft-900 text-loft-800 dark:text-amber-200 hover:bg-loft-200 dark:hover:bg-loft-800 transition flex items-center gap-1">
+          <i class="fa-solid fa-globe"></i>
+          <span id="current-lang-label">English</span>
+        </button>
 
-        <!-- قسم تصفية وعرض المهام المجدولة -->
-        <section class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                    <h2 class="heading-font text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                        <span>📋</span>
-                        <span>الجدول الزمني لمهام اليوم</span>
-                    </h2>
-                    <span id="activeClock" class="text-xs px-2.5 py-1 bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-mono">--:--</span>
-                </div>
-
-                <!-- أزرار التصفية السريعة -->
-                <div class="flex items-center bg-slate-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
-                    <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark text-slate-800 dark:text-white shadow-xs transition">الكل</button>
-                    <button onclick="setFilter('pending')" id="filterPending" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">المتبقية</button>
-                    <button onclick="setFilter('completed')" id="filterCompleted" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">المنجزة</button>
-                </div>
-            </div>
-
-            <!-- الحالة الفارغة في حال عدم وجود مهام -->
-            <div id="emptyState" class="hidden py-14 px-4 text-center rounded-3xl bg-white dark:bg-cardDark border border-dashed border-slate-200 dark:border-borderDark">
-                <div class="text-5xl mb-3">🎓✨</div>
-                <h3 class="font-bold text-slate-700 dark:text-slate-200 text-base mb-1">جدولك خالٍ حالياً!</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                    قم بإضافة أول واجب، محاضرة، أو جلسة دراسية للاستفادة من التذكيرات الذكية والمتابعة الدقيقة.
-                </p>
-            </div>
-
-            <!-- قائمة المهام الديناميكية -->
-            <ul id="tasksContainer" class="space-y-3">
-                <!-- يتم ملء المهام بواسطة الجافاسكربت -->
-            </ul>
-        </section>
+        <!-- Dark / Light Theme Toggle (Light Default) -->
+        <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="w-9 h-9 rounded-xl flex items-center justify-center bg-loft-100 dark:bg-loft-900 text-loft-800 dark:text-amber-300 hover:bg-loft-200 dark:hover:bg-loft-800 transition" title="تبديل المظهر">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:inline"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- التذييل الأكاديمي الشامل والأنيق (Footer) -->
-    <footer class="mt-14 bg-white dark:bg-cardDark border-t border-slate-200 dark:border-borderDark transition-colors duration-300">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-slate-100 dark:border-borderDark">
-                
-                <!-- العمود الأول: التعريف والغرض -->
-                <div class="space-y-2">
-                    <div class="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 text-sm">
-                        <span>🎓</span>
-                        <span>منظومة النجاح الجامعي</span>
-                    </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        أداة مبنية وفق أحدث استراتيجيات إدارة الوقت (مصفوفة آيزنهاور، تقنية بومودورو) لمساعدة الطلاب على التخلص من التسويف وضمان التفوق الفصلي.
-                    </p>
-                </div>
+    <!-- Main Tabs Navigation Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-2 overflow-x-auto py-1 border-t border-loft-100 dark:border-loft-900/60 text-xs sm:text-sm font-semibold scrollbar-none">
+      <button onclick="app.switchTab('pos')" data-tab="pos" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition shadow-sm">
+        <i class="fa-solid fa-cash-register"></i>
+        <span data-i18n="tab_pos">نقطة البيع (POS)</span>
+      </button>
 
-                <!-- العمود الثاني: ركائز الدراسة الفعالة -->
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                        قواعد ذهبية للتحصيل
-                    </h4>
-                    <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
-                        <li class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                            <span>ابدأ دائماً بالمهمة الأكثر وزناً وأهمية.</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>قسّم المشاريع الكبيرة لمهام صغيرة محددة بوقت.</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            <span>الراحة المنتظمة تضاعف سعة الاستيعاب والتركيز.</span>
-                        </li>
-                    </ul>
-                </div>
+      <button onclick="app.switchTab('kds')" data-tab="kds" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-fire-burner"></i>
+        <span data-i18n="tab_kds">شاشة التحضير (KDS)</span>
+        <span id="kds-pending-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500 text-white">0</span>
+      </button>
 
-                <!-- العمود الثالث: مؤشر الخصوصية والأمان -->
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                        حفظ البيانات والخصوصية
-                    </h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        جميع جداولك وملاحظاتك الدراسية تُحفظ مباشرة وبشكل آمن في متصفحك الشخصي دون الحاجة لحساب أو اتصال خارجي.
-                    </p>
-                    <div class="pt-1 flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                        <span>🔒</span>
-                        <span>الوضع المحلي الآمن نشط</span>
-                    </div>
-                </div>
+      <button onclick="app.switchTab('orders')" data-tab="orders" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-receipt"></i>
+        <span data-i18n="tab_orders">استعراض الطلبات والفواتير</span>
+      </button>
 
-            </div>
+      <button onclick="app.switchTab('menu_mgmt')" data-tab="menu_mgmt" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-utensils"></i>
+        <span data-i18n="tab_menu">إدارة القائمة والأسعار</span>
+      </button>
 
-            <!-- السطر السفلي لحقوق الامتياز والتطوير -->
-            <div class="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-slate-500">
-                <div>
-                    جميع الحقوق محفوظة &copy; منصة إنجاز الجامعية &bull; بالتنظيم والإصرار تصنع تفوقك 🚀
-                </div>
-                <div class="flex items-center gap-3">
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
-                        الوضع الافتراضي: الفاتح ☀️
-                    </span>
-                </div>
-            </div>
-        </div>
-    </footer>
+      <button onclick="app.switchTab('inventory')" data-tab="inventory" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span data-i18n="tab_inventory">إدارة المخزون</span>
+        <span id="low-stock-alert-badge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white badge-pulse">!</span>
+      </button>
 
-    <!-- صندوق الإشعار المنبثق الداخلي (Toast) كبديل راقٍ لـ alert() -->
-    <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 max-w-md w-[92%] sm:w-auto z-50 pointer-events-none opacity-0 translate-y-8 transition-all duration-300">
-        <div id="toastContent" class="bg-white dark:bg-cardDark text-slate-800 dark:text-slate-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-borderDark flex items-center gap-3">
-            <span id="toastIcon" class="text-2xl shrink-0">🔔</span>
-            <div class="flex-1">
-                <h4 id="toastTitle" class="text-xs font-bold text-slate-400 dark:text-slate-400">تنبيه ذكي</h4>
-                <p id="toastMessage" class="text-sm font-semibold leading-snug">نص الإشعار يظهر هنا</p>
-            </div>
-        </div>
+      <button onclick="app.switchTab('tasks_shifts')" data-tab="tasks_shifts" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-list-check"></i>
+        <span data-i18n="tab_tasks">المهام ونوبات الموظفين</span>
+      </button>
+
+      <button onclick="app.switchTab('promos')" data-tab="promos" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-tags"></i>
+        <span data-i18n="tab_promos">العروض وأكواد الخصم</span>
+      </button>
+
+      <button onclick="app.switchTab('cashflow')" data-tab="cashflow" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-money-bill-transfer"></i>
+        <span data-i18n="tab_cashflow">الوارد والصادر (المالية)</span>
+      </button>
+
+      <button onclick="app.switchTab('admin_specs')" data-tab="admin_specs" class="tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span data-i18n="tab_specs">المعمارية وقاعدة البيانات (Specs)</span>
+      </button>
     </div>
+  </header>
 
-    <!-- نافذة التلميح الإداري العائمة بتأثيرات بصرية وانسيابية فائقة -->
-    <aside id="startupBanner" 
-           class="fixed bottom-5 sm:bottom-7 right-4 sm:right-7 z-40 max-w-md w-[calc(100%-2rem)] sm:w-[410px] rounded-3xl bg-gradient-to-br from-indigo-700/95 via-brand-700/95 to-blue-800/95 dark:from-indigo-950/95 dark:via-brand-950/95 dark:to-slate-900/95 backdrop-blur-xl border border-white/20 text-white shadow-2xl shadow-brand-900/35 p-5 transition-all floating-hint-enter floating-bobbing" 
-           role="complementary" 
-           aria-label="تلميح إداري وتحفيزي عائم">
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 space-y-6">
+
+    <!-- ============================================================ -->
+    <!-- TAB 1: POS (نقطة البيع وتسجيل الطلبات) -->
+    <!-- ============================================================ -->
+    <section id="view-pos" class="tab-content block">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- خلفية زخرفية ناعمة -->
-        <div class="absolute -right-8 -bottom-8 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
-        <div class="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-indigo-400/20 blur-lg pointer-events-none"></div>
-
-        <div class="relative z-10 space-y-3.5">
-            <!-- الشريط العلوي للتلميح مع زر الإغلاق الانسيابي -->
-            <div class="flex items-center justify-between gap-2 border-b border-white/15 pb-2.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-base shrink-0 shadow-xs">
-                        💡
-                    </span>
-                    <div>
-                        <span id="tipCategory" class="text-[11px] font-bold tracking-wide uppercase bg-white/25 px-2.5 py-0.5 rounded-full text-indigo-50 inline-block">
-                            توجيه أكاديمي وإداري
-                        </span>
-                    </div>
-                </div>
-
-                <!-- زر الإغلاق الأنيق مع حركة تفاعلية -->
-                <button onclick="closeFloatingHint()" 
-                        title="إغلاق التلميح" 
-                        class="w-7 h-7 rounded-xl bg-white/15 hover:bg-white/30 active:scale-90 text-white/90 hover:text-white flex items-center justify-center transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+        <!-- Left 8 Columns: Products & Filters -->
+        <div class="lg:col-span-8 space-y-4">
+          
+          <!-- Category Filters & Search -->
+          <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <!-- Category Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+              <button onclick="app.setPosCategory('all')" id="cat-btn-all" class="cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition">
+                <i class="fa-solid fa-border-all ml-1"></i> <span data-i18n="cat_all">الكل</span>
+              </button>
+              <button onclick="app.setPosCategory('cold')" id="cat-btn-cold" class="cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-100 dark:bg-loft-900 text-slate-700 dark:text-slate-200 hover:bg-loft-200 dark:hover:bg-loft-800 transition">
+                <i class="fa-solid fa-snowflake ml-1 text-cyan-500"></i> <span data-i18n="cat_cold">مشروبات باردة</span>
+              </button>
+              <button onclick="app.setPosCategory('hot')" id="cat-btn-hot" class="cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-100 dark:bg-loft-900 text-slate-700 dark:text-slate-200 hover:bg-loft-200 dark:hover:bg-loft-800 transition">
+                <i class="fa-solid fa-mug-hot ml-1 text-amber-600"></i> <span data-i18n="cat_hot">مشروبات ساخنة</span>
+              </button>
+              <button onclick="app.setPosCategory('sweets')" id="cat-btn-sweets" class="cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-100 dark:bg-loft-900 text-slate-700 dark:text-slate-200 hover:bg-loft-200 dark:hover:bg-loft-800 transition">
+                <i class="fa-solid fa-cake-candles ml-1 text-rose-500"></i> <span data-i18n="cat_sweets">الحلويات والكيك</span>
+              </button>
             </div>
 
-            <!-- نص التلميح المتجدد مع انتقال ناعم -->
-            <p id="tipText" class="text-xs sm:text-sm font-semibold leading-relaxed text-indigo-50 transition-opacity duration-200">
-                جاري تهيئة تلميحك الإداري...
-            </p>
-
-            <!-- أزرار الإجراءات السريعة داخل البطاقة العائمة -->
-            <div class="flex items-center justify-between gap-2 pt-1">
-                <button onclick="displayNextHint()" 
-                        class="text-xs font-semibold px-3 py-1.5 bg-white/15 hover:bg-white/25 active:scale-95 border border-white/20 rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
-                    <span>🔄</span>
-                    <span>تلميح آخر</span>
-                </button>
-
-                <button onclick="closeFloatingHint()" 
-                        class="text-xs font-bold px-3.5 py-1.5 bg-white text-brand-700 hover:bg-indigo-50 active:scale-95 rounded-xl shadow-md transition-all flex items-center gap-1">
-                    <span>فهمت ذلك</span>
-                    <span>✓</span>
-                </button>
+            <!-- Search input -->
+            <div class="relative w-full sm:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="pos-search-input" oninput="app.renderPosProducts()" placeholder="بحث عن منتج..." class="w-full pr-8 pl-3 py-2 text-xs rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 focus:outline-none focus:border-caramel dark:focus:border-amber-400 text-slate-800 dark:text-slate-100">
             </div>
+          </div>
+
+          <!-- Product Grid -->
+          <div id="pos-products-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
+            <!-- Dynamic products rendered via JS -->
+          </div>
         </div>
-    </aside>
 
-    <!-- زر مصغر عائم لإعادة فتح التلميح في حال قام المستخدم بإغلاقه -->
-    <button id="reopenHintBtn" 
-            onclick="reopenFloatingHint()" 
-            title="عرض نصيحة وتلميح إداري"
-            class="hidden fixed bottom-5 sm:bottom-7 right-4 sm:right-7 z-40 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-brand-600/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-white/20 group">
-        <span class="text-base group-hover:rotate-12 transition-transform">💡</span>
-        <span>تلميح اليوم</span>
-    </button>
+        <!-- Right 4 Columns: Cart & Order Completion -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-white dark:bg-loft-950 p-4 sm:p-5 rounded-2xl border border-loft-200 dark:border-loft-900 shadow-sm flex flex-col h-[calc(100vh-160px)] sticky top-24">
+            
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+              <div>
+                <h3 class="font-bold text-base text-loft-900 dark:text-amber-200 flex items-center gap-2">
+                  <i class="fa-solid fa-basket-shopping text-caramel"></i>
+                  <span data-i18n="cart_title">الطلب الحالي</span>
+                </h3>
+                <span id="cart-item-count-badge" class="text-xs text-slate-500 dark:text-slate-400">0 أصناف</span>
+              </div>
+              
+              <!-- Clear Cart -->
+              <button onclick="app.clearCart()" class="text-rose-500 hover:text-rose-700 text-xs font-semibold flex items-center gap-1 transition">
+                <i class="fa-regular fa-trash-can"></i>
+                <span data-i18n="cart_clear">تفريغ</span>
+              </button>
+            </div>
 
-    <script>
-        /* ========================================================
-           قاعدة بيانات التلميحات الإدارية والأكاديمية والتحفيزية
-           (تظهر نصيحة مختلفة تشجيعية عند كل تشغيل للتطبيق)
-        ======================================================== */
-        const startupWisdomList = [
-            {
-                category: "إدارة الوقت والأولويات",
-                text: "طبق قاعدة 20/80 (باريتو): 20% من المواد والواجبات الهامة تحقق 80% من نتائجك وتفوقك الفصلي."
-            },
-            {
-                category: "تقنية دراسية فعالة",
-                text: "استخدم تقنية الاسترجاع النشط (Active Recall): اختبر نفسك بالأسئلة بدلاً من مجرد إعادة قراءة الملخصات."
-            },
-            {
-                category: "علم الإنجاز والتغلب على التسويف",
-                text: "قاعدة الخمس ثوانٍ: عندما تشعر بالتردد في بدء المذاكرة، عد تنازلياً 5-4-3-2-1 وابدأ فوراً بدون مفاوضة عقلك."
-            },
-            {
-                category: "توازن الطاقة والتركيز",
-                text: "تقنية بومودورو: ذاكر بتركيز تام لمدة 25 دقيقة، ثم خذ استراحة 5 دقائق لتجديد طاقتك الذهنية."
-            },
-            {
-                category: "تحفيز وإرادة",
-                text: "التعب يزول والدرجات والتفوق يبقى أثره. كل ساعة استثمار تقضيها اليوم تبني مستقبلك المهني غداً."
-            },
-            {
-                category: "مصفوفة آيزنهاور",
-                text: "فرّق دائماً بين 'العاجل' و'المهم'. لا تجعل الواجبات تتراكم حتى تتحول جميعها إلى حالات طوارئ مضغوطة."
-            },
-            {
-                category: "التفكير الاستراتيجي الجامعي",
-                text: "احرص على إنهاء متطلبات الأسبوع قبل عطلة نهاية الأسبوع لتستمتع براحة ذهنية حقيقية دون وخز الضمير."
-            },
-            {
-                category: "شحذ الهمة",
-                text: "أفضل طريقة للبدء هي التوقف عن الكلام والبدء في العمل. افتح دفترك الآن واخطُ الخطوة الأولى!"
-            }
-        ];
+            <!-- Table Selection -->
+            <div class="py-2.5 border-b border-loft-100 dark:border-loft-900 space-y-1.5">
+              <label class="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                <span><i class="fa-solid fa-chair text-loft-600 dark:text-amber-400 ml-1"></i> <span data-i18n="table_select">رقم الطاولة / نوع الطلب</span>:</span>
+                <span id="selected-table-label" class="text-caramel font-bold">طاولة 1</span>
+              </label>
+              <div class="grid grid-cols-4 gap-1.5 text-xs font-semibold">
+                <button type="button" onclick="app.selectPosTable('طاولة 1')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-300 dark:border-loft-800 bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition">طاولة 1</button>
+                <button type="button" onclick="app.selectPosTable('طاولة 2')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">طاولة 2</button>
+                <button type="button" onclick="app.selectPosTable('طاولة 3')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">طاولة 3</button>
+                <button type="button" onclick="app.selectPosTable('سفري / Takeaway')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">سفري</button>
+                <button type="button" onclick="app.selectPosTable('طاولة 4')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">طاولة 4</button>
+                <button type="button" onclick="app.selectPosTable('طاولة 5')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">طاولة 5</button>
+                <button type="button" onclick="app.selectPosTable('بار / Bar')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">البار</button>
+                <button type="button" onclick="app.selectPosTable('توصيل / Delivery')" class="table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition">توصيل</button>
+              </div>
+            </div>
 
-        /* عبارات التحفيز الفورية عند إتمام كل مهمة */
-        const completionCheerQuotes = [
-            "عمل استثنائي! خطوة جبارة تقربك من معدلك المستهدف 🎓🌟",
-            "مهمة أُغلقت بنجاح! طاقة إنجازك اليوم تثير الإعجاب 💪✨",
-            "رائع جداً! استمر بهذا الزخم؛ النجاح عادة وليس صدفة 🚀",
-            "أحسنت صنعاً! خذ استراحة قصيرة، فالعقل المتجدد أسرع في الاستيعاب ☕",
-            "بطل! إنجازك لهذه المهمة يزيل عبئاً كبيراً عن كاهلك.. إلى الأمام 🎯"
-        ];
+            <!-- Cart Items Scrollable List -->
+            <div id="cart-items-container" class="flex-1 overflow-y-auto py-2 space-y-2 pr-1">
+              <!-- Empty state default -->
+              <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-10">
+                <i class="fa-solid fa-mug-saucer text-4xl mb-2 text-loft-300 dark:text-loft-800"></i>
+                <p class="text-xs" data-i18n="cart_empty">السلة فارغة، اضغط على الأصناف لإضافتها</p>
+              </div>
+            </div>
 
-        /* ========================================================
-           حالة التطبيق العامة وتخزين البيانات
-        ======================================================== */
-        let tasks = [];
-        let currentFilter = 'all';
-        let soundEnabled = true;
-        let audioCtx = null;
-        let clockTimer = null;
+            <!-- Promo Code Input & Condition Alert -->
+            <div class="pt-2 border-t border-loft-100 dark:border-loft-900 space-y-1.5">
+              <div class="flex gap-1.5">
+                <div class="relative flex-1">
+                  <i class="fa-solid fa-tag absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                  <input type="text" id="pos-promo-input" placeholder="كود الخصم (مثال: LOFT10)" class="w-full pr-7 pl-2 py-1.5 text-xs uppercase font-mono rounded-lg bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 focus:outline-none focus:border-caramel dark:focus:border-amber-400">
+                </div>
+                <button onclick="app.applyPromoCode()" class="px-3 py-1.5 bg-caramel hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition">
+                  <span data-i18n="apply_promo">تطبيق</span>
+                </button>
+              </div>
+              <!-- Condition display for promo -->
+              <div id="applied-promo-info" class="hidden text-[11px] p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200">
+                <div class="flex justify-between items-center font-bold">
+                  <span id="promo-code-name">LOFT10</span>
+                  <button onclick="app.removePromoCode()" class="text-rose-500 hover:text-rose-700">إلغاء</button>
+                </div>
+                <p id="promo-code-condition" class="text-[10px] text-slate-600 dark:text-slate-300 mt-0.5">الحالة: خصم 10% للزبائن عند الطلب الأول</p>
+              </div>
+            </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTheme();
-            renderCurrentDate();
-            loadStoredTasks();
-            displayNextHint();
-            renderTaskList();
-            updateStats();
-            startLiveClockAndReminders();
+            <!-- Calculation Summary -->
+            <div class="pt-2.5 border-t border-loft-100 dark:border-loft-900 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                <span data-i18n="subtotal">المجموع الفرعي:</span>
+                <span id="cart-subtotal-val" class="font-mono font-semibold">0 ₪</span>
+              </div>
+              <div class="flex justify-between text-rose-500">
+                <span data-i18n="discount">الخصم:</span>
+                <span id="cart-discount-val" class="font-mono font-semibold">-0 ₪</span>
+              </div>
+              <div class="flex justify-between items-center text-sm font-black text-loft-950 dark:text-amber-200 pt-1 border-t border-dashed border-loft-200 dark:border-loft-800">
+                <span data-i18n="total_due">المجموع النهائي:</span>
+                <span id="cart-total-val" class="text-lg font-mono text-caramel dark:text-amber-400">0 ₪</span>
+              </div>
+            </div>
+
+            <!-- Order Action Buttons -->
+            <div class="pt-3 grid grid-cols-2 gap-2">
+              <button onclick="app.submitOrder('cash')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                <span data-i18n="pay_cash">دفع نقدي</span>
+              </button>
+              <button onclick="app.submitOrder('card')" class="w-full py-2.5 bg-loft-800 dark:bg-amber-500 dark:text-loft-950 hover:bg-loft-900 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition">
+                <i class="fa-solid fa-credit-card"></i>
+                <span data-i18n="pay_card">دفع إلكتروني</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 2: KDS (شاشة التحضير للباريستا) -->
+    <!-- ============================================================ -->
+    <section id="view-kds" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-mug-hot text-amber-500"></i>
+            <span data-i18n="kds_title">شاشة تحضير الباريستا (KDS)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="kds_subtitle">متابعة تحضير الطلبات حسب الأسبقية والأولوية الفورية</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-xs">
+            <span class="inline-block w-3 h-3 rounded-full bg-amber-500"></span> <span>قيد الانتظار</span>
+            <span class="inline-block w-3 h-3 rounded-full bg-blue-500"></span> <span>جاري التحضير</span>
+            <span class="inline-block w-3 h-3 rounded-full bg-emerald-500"></span> <span>جاهز للتسليم</span>
+          </div>
+          <button onclick="app.renderKds()" class="px-3 py-1.5 bg-loft-100 dark:bg-loft-900 hover:bg-loft-200 dark:hover:bg-loft-800 rounded-xl text-xs font-bold transition">
+            <i class="fa-solid fa-rotate-right"></i> تحديث
+          </button>
+        </div>
+      </div>
+
+      <!-- KDS Cards Columns Grid -->
+      <div id="kds-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Cards dynamically injected -->
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 3: ORDER HISTORY & INVOICE BROWSING -->
+    <!-- ============================================================ -->
+    <section id="view-orders" class="tab-content hidden space-y-4">
+      <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-caramel"></i>
+            <span data-i18n="orders_archive_title">سجل الطلبات والفواتير المكتملة</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="orders_archive_desc">استعراض كافة العمليات المسجلة وإعادة طباعة الفواتير</p>
+        </div>
+        
+        <!-- Filter options -->
+        <div class="flex items-center gap-2">
+          <select id="orders-filter-status" onchange="app.renderOrdersArchive()" class="px-3 py-2 text-xs rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 text-slate-800 dark:text-slate-200">
+            <option value="all">كل الحالات</option>
+            <option value="completed">مكتمل ومسلّم</option>
+            <option value="preparing">قيد التحضير</option>
+            <option value="pending">جديد</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-right rtl:text-right ltr:text-left">
+            <thead class="bg-loft-100 dark:bg-loft-900/70 text-slate-700 dark:text-slate-300 font-bold border-b border-loft-200 dark:border-loft-800">
+              <tr>
+                <th class="p-3">رقم الفاتورة</th>
+                <th class="p-3">الوقت والتاريخ</th>
+                <th class="p-3">الطاولة / النوع</th>
+                <th class="p-3">الأصناف المطلوبة</th>
+                <th class="p-3">طريقة الدفع</th>
+                <th class="p-3">الخصم</th>
+                <th class="p-3">المجموع الصافي</th>
+                <th class="p-3">الحالة</th>
+                <th class="p-3 text-center">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="orders-archive-tbody" class="divide-y divide-loft-100 dark:divide-loft-900/80">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 4: MENU & SERVICES MANAGEMENT (CRUD) -->
+    <!-- ============================================================ -->
+    <section id="view-menu_mgmt" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-utensils text-caramel"></i>
+            <span data-i18n="menu_mgmt_title">إدارة قائمة الخدمات والمشروبات والحلويات</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="menu_mgmt_desc">إمكانية الإضافة والتعديل والحذف وتغيير الأسعار بالشيقل (₪)</p>
+        </div>
+        <button onclick="app.openProductModal()" class="px-4 py-2 rounded-xl bg-loft-800 hover:bg-loft-900 text-white dark:bg-amber-500 dark:text-loft-950 dark:hover:bg-amber-400 font-bold text-xs flex items-center gap-1.5 shadow transition">
+          <i class="fa-solid fa-plus"></i>
+          <span data-i18n="add_new_product">إضافة صنف جديد</span>
+        </button>
+      </div>
+
+      <!-- Menu Items Table -->
+      <div class="bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-right rtl:text-right ltr:text-left">
+            <thead class="bg-loft-100 dark:bg-loft-900/70 text-slate-700 dark:text-slate-300 font-bold border-b border-loft-200 dark:border-loft-800">
+              <tr>
+                <th class="p-3">الصورة</th>
+                <th class="p-3">اسم المنتج</th>
+                <th class="p-3">التصنيف</th>
+                <th class="p-3">السعر (₪)</th>
+                <th class="p-3">المكونات الأساسية المرتبطة</th>
+                <th class="p-3 text-center">التحكم</th>
+              </tr>
+            </thead>
+            <tbody id="menu-items-tbody" class="divide-y divide-loft-100 dark:divide-loft-900/80">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 5: INVENTORY MANAGEMENT -->
+    <!-- ============================================================ -->
+    <section id="view-inventory" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-amber-600"></i>
+            <span data-i18n="inventory_title">إدارة المخزون والمواد الخام</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="inventory_desc">تتبع كميات البن، الحليب، الأكواب، والنكهات مع تنبيهات تلقائية عند نقص المخزون</p>
+        </div>
+        <button onclick="app.openInventoryModal()" class="px-4 py-2 rounded-xl bg-loft-800 hover:bg-loft-900 text-white dark:bg-amber-500 dark:text-loft-950 font-bold text-xs flex items-center gap-1.5 shadow transition">
+          <i class="fa-solid fa-plus"></i>
+          <span>إضافة مادة خام جديدة</span>
+        </button>
+      </div>
+
+      <!-- Inventory Metrics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-warehouse"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">إجمالي المواد المتتبعة</p>
+            <p id="inv-total-count" class="text-lg font-black font-mono">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">مواد أوشكت على النفاد</p>
+            <p id="inv-low-count" class="text-lg font-black font-mono text-rose-600">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">المخزون الآمن</p>
+            <p id="inv-safe-count" class="text-lg font-black font-mono text-emerald-600">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-right rtl:text-right ltr:text-left">
+            <thead class="bg-loft-100 dark:bg-loft-900/70 text-slate-700 dark:text-slate-300 font-bold border-b border-loft-200 dark:border-loft-800">
+              <tr>
+                <th class="p-3">المادة الخام</th>
+                <th class="p-3">الكمية المتوفرة</th>
+                <th class="p-3">الوحدة</th>
+                <th class="p-3">الحد الأدنى للتنبيه</th>
+                <th class="p-3">الحالة والمستوى</th>
+                <th class="p-3 text-center">التحكم</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody" class="divide-y divide-loft-100 dark:divide-loft-900/80">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 6: TASKS & SHIFTS (مع تاريخ بداية ونهاية) -->
+    <!-- ============================================================ -->
+    <section id="view-tasks_shifts" class="tab-content hidden space-y-6">
+      
+      <!-- Top Actions -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-caramel"></i>
+            <span data-i18n="tasks_shifts_title">إدارة مهام المقهى ونوبات العمل (Shifts)</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="tasks_shifts_desc">كل مهمة محددة بتاريخ ووقت بداية ونهاية، مع تسجيل الحضور والانصراف</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="app.openTaskModal()" class="px-4 py-2 rounded-xl bg-loft-800 hover:bg-loft-900 text-white dark:bg-amber-500 dark:text-loft-950 font-bold text-xs flex items-center gap-1.5 shadow transition">
+            <i class="fa-solid fa-plus"></i>
+            <span>إضافة مهمة جديدة</span>
+          </button>
+          <button onclick="app.openShiftAttendanceModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span>تسجيل حضور / انصراف</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2 Columns: Tasks & Shifts -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Tasks List (7 cols) -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-loft-900 dark:text-amber-200">
+              <i class="fa-solid fa-clipboard-list ml-1"></i> قائمة المهام التشغيلية اليومية
+            </h3>
+            <span class="text-xs text-slate-500">جرد الصندوق، تنظيف مكينة الإسبريسو، التحضير الصباحي</span>
+          </div>
+
+          <div id="tasks-list-container" class="space-y-2.5">
+            <!-- Dynamic tasks list -->
+          </div>
+        </div>
+
+        <!-- Shifts & Attendance Log (5 cols) -->
+        <div class="lg:col-span-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-sm text-loft-900 dark:text-amber-200">
+              <i class="fa-solid fa-clock-rotate-left ml-1"></i> سجل الحضور ونوبات العمل الحالية
+            </h3>
+          </div>
+
+          <div class="bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 p-4 space-y-3 shadow-sm">
+            <div id="shifts-log-container" class="space-y-2">
+              <!-- Dynamic shift records -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 7: PROMO CODES & OFFERS (مع توضيح الحالة والسبب) -->
+    <!-- ============================================================ -->
+    <section id="view-promos" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-tags text-caramel"></i>
+            <span data-i18n="promos_title">أكواد الخصم والعروض الترويجية</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="promos_desc">تحديد وتوضيح الحالة والشرط الذي يحصل الزبون بسببه على الخصم</p>
+        </div>
+        <button onclick="app.openPromoModal()" class="px-4 py-2 rounded-xl bg-loft-800 hover:bg-loft-900 text-white dark:bg-amber-500 dark:text-loft-950 font-bold text-xs flex items-center gap-1.5 shadow transition">
+          <i class="fa-solid fa-plus"></i>
+          <span>إضافة كود خصم جديد</span>
+        </button>
+      </div>
+
+      <!-- Promo cards grid -->
+      <div id="promos-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 8: CASHFLOW (الوارد والصادر والخزينة) -->
+    <!-- ============================================================ -->
+    <section id="view-cashflow" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900">
+        <div>
+          <h2 class="text-lg font-black text-loft-900 dark:text-amber-200 flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced text-emerald-600"></i>
+            <span data-i18n="cashflow_title">حركة الصندوق المالي: الوارد والصادر</span>
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="cashflow_desc">مراقبة المقبوضات النقدية والإلكترونية ومصروفات المواد الخام والصيانة</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="app.openCashflowModal('in')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
+            <i class="fa-solid fa-arrow-down"></i>
+            <span>إضافة إيراد (وارد)</span>
+          </button>
+          <button onclick="app.openCashflowModal('out')" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
+            <i class="fa-solid fa-arrow-up"></i>
+            <span>تسجيل مصروف (صادر)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Financial Metrics Summary -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Total Inflow -->
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-600">إجمالي الوارد (Inflow)</span>
+            <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-circle-arrow-down"></i></span>
+          </div>
+          <div class="mt-2">
+            <span id="cashflow-total-in" class="text-2xl font-black font-mono text-slate-900 dark:text-slate-100">0 ₪</span>
+            <p class="text-[11px] text-slate-400 mt-0.5">مبيعات الطلبات + إيداعات الصندوق</p>
+          </div>
+        </div>
+
+        <!-- Total Outflow -->
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-rose-200 dark:border-rose-900/50 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-600">إجمالي الصادر (Outflow)</span>
+            <span class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 flex items-center justify-center text-sm"><i class="fa-solid fa-circle-arrow-up"></i></span>
+          </div>
+          <div class="mt-2">
+            <span id="cashflow-total-out" class="text-2xl font-black font-mono text-slate-900 dark:text-slate-100">0 ₪</span>
+            <p class="text-[11px] text-slate-400 mt-0.5">مشتريات خامات، صيانة، رواتب، تشغيل</p>
+          </div>
+        </div>
+
+        <!-- Net Balance -->
+        <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-300 dark:border-loft-800 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-loft-700 dark:text-amber-400">الرصيد الصافي في الدرج</span>
+            <span class="w-8 h-8 rounded-lg bg-loft-100 dark:bg-loft-900 text-loft-800 dark:text-amber-400 flex items-center justify-center text-sm"><i class="fa-solid fa-vault"></i></span>
+          </div>
+          <div class="mt-2">
+            <span id="cashflow-net-balance" class="text-2xl font-black font-mono text-caramel dark:text-amber-300">0 ₪</span>
+            <p class="text-[11px] text-slate-400 mt-0.5">الرصيد الفعلي المتوفر</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Log Table -->
+      <div class="bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 overflow-hidden shadow-sm">
+        <div class="p-3 border-b border-loft-100 dark:border-loft-900 font-bold text-xs flex justify-between items-center">
+          <span>سجل الحركات المالية التفصيلي</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-right rtl:text-right ltr:text-left">
+            <thead class="bg-loft-100 dark:bg-loft-900/70 text-slate-700 dark:text-slate-300 font-bold">
+              <tr>
+                <th class="p-3">الوقت والتاريخ</th>
+                <th class="p-3">النوع</th>
+                <th class="p-3">البيان / الوصف</th>
+                <th class="p-3">التصنيف</th>
+                <th class="p-3">المبلغ (₪)</th>
+                <th class="p-3 text-center">حذف</th>
+              </tr>
+            </thead>
+            <tbody id="cashflow-tbody" class="divide-y divide-loft-100 dark:divide-loft-900/80">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 9: PRODUCT MANAGER & ARCHITECTURE SPECIFICATIONS -->
+    <!-- ============================================================ -->
+    <section id="view-admin_specs" class="tab-content hidden space-y-6">
+      
+      <!-- PM Overview Banner -->
+      <div class="bg-gradient-to-r from-loft-900 via-loft-800 to-loft-950 text-white p-6 rounded-3xl shadow-xl space-y-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 text-2xl">
+            <i class="fa-solid fa-chess-knight"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-amber-200">دليل مدير المنتج (Product Manager) ومهندس البرمجيات</h2>
+            <p class="text-xs text-loft-200">الرؤية المعمارية، خريطة تدفق البيانات، هيكل قواعد البيانات، واستراتيجية عدم انقطاع الخدمة (Offline-First)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Core Pillars Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Pillar 1: UI/UX & Brand Identity -->
+        <div class="bg-white dark:bg-loft-950 p-5 rounded-2xl border border-loft-200 dark:border-loft-900 space-y-3">
+          <h3 class="font-bold text-base text-loft-900 dark:text-amber-200 flex items-center gap-2 border-b border-loft-100 dark:border-loft-900 pb-2">
+            <i class="fa-solid fa-palette text-caramel"></i>
+            1. تصميم تجربة وواجهة المستخدم (UI/UX)
+          </h3>
+          <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-300 leading-relaxed">
+            <li><strong class="text-loft-900 dark:text-amber-300">لوحة الألوان (Coffee Palette):</strong> اعتماد درجات الإسبريسو العميقة (#23140e و #3d251d)، والكراميل الدافئ (#d97706)، مع لمسات الكريمة والحليب (#fbf8f5) لخلق بيئة مريحة وشهية للعين.</li>
+            <li><strong class="text-loft-900 dark:text-amber-300">الخطوط:</strong> خط <em>Cairo</em> العربي العصري المميز بوضوح الأرقام ومقروئيته السريعة في بيئة العمل السريعة، وخط <em>Inter</em> للترميز والإنجليزية.</li>
+            <li><strong class="text-loft-900 dark:text-amber-300">الوضع الافتراضي:</strong> يدعم النمط الفاتح النظيف والنمط الداكن للعمل الليلي مع الحفاظ على التباين العالي (Contrast Ratio 4.5:1+).</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: Offline-First Strategy -->
+        <div class="bg-white dark:bg-loft-950 p-5 rounded-2xl border border-loft-200 dark:border-loft-900 space-y-3">
+          <h3 class="font-bold text-base text-loft-900 dark:text-amber-200 flex items-center gap-2 border-b border-loft-100 dark:border-loft-900 pb-2">
+            <i class="fa-solid fa-cloud-arrow-down text-cyan-600"></i>
+            2. هندسة العمل بدون إنترنت (Offline-First Architecture)
+          </h3>
+          <ul class="text-xs space-y-2 text-slate-600 dark:text-slate-300 leading-relaxed">
+            <li><strong class="text-loft-900 dark:text-amber-300">طريقة العمل:</strong> عند انقطاع الإنترنت، لا تتوقف العمليات مطلقاً! يتم توليد معرفات الطلبات محلياً باستخدام UUID v4 أو معرف تسلسلي محلي.</li>
+            <li><strong class="text-loft-900 dark:text-amber-300">التخزين المحلي:</strong> حفظ الفواتير في طابور محلي (Local Sync Queue عبر IndexedDB/LocalStorage).</li>
+            <li><strong class="text-loft-900 dark:text-amber-300">الطباعة الفورية:</strong> الطباعة الحرارية للفواتير تتم عبر شبكة الـ LAN المحلية (ESC/POS Printer) مباشرة دون الحاجة لأي خادم خارجي.</li>
+            <li><strong class="text-loft-900 dark:text-amber-300">المزامنة التلقائية:</strong> فور عودة الاتصال، يطلق التطبيق مزامنة صامتة في الخلفية مع حل النزاعات (Conflict Resolution: Last-Write-Wins).</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3: Tech Stack -->
+        <div class="bg-white dark:bg-loft-950 p-5 rounded-2xl border border-loft-200 dark:border-loft-900 space-y-3">
+          <h3 class="font-bold text-base text-loft-900 dark:text-amber-200 flex items-center gap-2 border-b border-loft-100 dark:border-loft-900 pb-2">
+            <i class="fa-solid fa-layer-group text-purple-600"></i>
+            3. التقنيات المقترحة (Tech Stack)
+          </h3>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900">
+              <span class="font-bold block text-loft-900 dark:text-amber-300">تطبيقات الهواتف (iOS / Android):</span>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">Flutter أو React Native + WatermelonDB لسرعة أداء فائقة وقابلية العمل أوفلاين مع العتاد المحمول.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900">
+              <span class="font-bold block text-loft-900 dark:text-amber-300">واجهة الويب ولوحة التحكم:</span>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">Next.js 14 (React) + Tailwind CSS أو Progressive Web App (PWA) مع Service Workers.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900">
+              <span class="font-bold block text-loft-900 dark:text-amber-300">الخادم الخلفي (Backend):</span>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">Node.js (NestJS) أو Go مع WebSockets لربط شاشات التحضير (KDS) والكاشير في جزء من الثانية.</p>
+            </div>
+            <div class="p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900">
+              <span class="font-bold block text-loft-900 dark:text-amber-300">قواعد البيانات:</span>
+              <p class="text-slate-500 dark:text-slate-400 mt-1">PostgreSQL + Prisma ORM، مع SQLite أو IndexedDB على الأجهزة المحلية.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 4: Database Schema -->
+        <div class="bg-white dark:bg-loft-950 p-5 rounded-2xl border border-loft-200 dark:border-loft-900 space-y-3">
+          <h3 class="font-bold text-base text-loft-900 dark:text-amber-200 flex items-center gap-2 border-b border-loft-100 dark:border-loft-900 pb-2">
+            <i class="fa-solid fa-database text-emerald-600"></i>
+            4. مخطط وهيكل قاعدة البيانات (Database Schema)
+          </h3>
+          <div class="text-[11px] font-mono bg-loft-100 dark:bg-loft-900 p-3 rounded-xl overflow-x-auto text-slate-800 dark:text-slate-200 leading-relaxed">
+-- جداول العلاقات الرئيسية
+1. Employees (id, name, role, pin_code, rating, created_at)
+2. Shifts (id, employee_id, check_in, check_out, total_hours, status)
+3. Categories (id, name_ar, name_en, icon)
+4. Products (id, category_id, name_ar, name_en, price, img_url)
+5. Orders (id, order_number, table_no, total, discount, final_amount, payment_type, status, created_at)
+6. OrderItems (id, order_id, product_id, quantity, unit_price, notes)
+7. Inventory (id, item_name, current_qty, unit, min_threshold, cost_price)
+8. Tasks (id, title, assigned_to, start_datetime, end_datetime, status, priority)
+9. Cashflow (id, type [IN/OUT], amount, reason, category, timestamp)
+10. Feedback (id, customer_name, rating, comment, timestamp, type [feedback/complaint])
+11. PromoCodes (id, code, discount_val, type [percent/fixed], condition_desc, is_active)
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- MODALS & DIALOGS -->
+  <!-- ============================================================ -->
+
+  <!-- Modal 1: Add / Edit Menu Product -->
+  <div id="modal-product" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 id="modal-product-title" class="font-bold text-sm text-loft-900 dark:text-amber-200">إضافة صنف جديد</h3>
+        <button onclick="app.closeModal('modal-product')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-product" onsubmit="app.saveProduct(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="prod-form-id">
+        <div>
+          <label class="block font-bold mb-1">اسم المنتج</label>
+          <input type="text" id="prod-form-name" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1">التصنيف</label>
+            <select id="prod-form-cat" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+              <option value="cold">مشروبات باردة</option>
+              <option value="hot">مشروبات ساخنة</option>
+              <option value="sweets">الحلويات والكيك</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">السعر بالشيقل (₪)</label>
+            <input type="number" step="0.5" id="prod-form-price" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">رابط الصورة (Image URL)</label>
+          <input type="url" id="prod-form-img" placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">المكونات الأساسية</label>
+          <input type="text" id="prod-form-ingredients" placeholder="مثال: حبوب قهوة، حليب، سيروب" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-product')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-loft-800 dark:bg-amber-500 text-white dark:text-loft-950 font-bold">حفظ وتأكيد</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add / Edit Inventory Item -->
+  <div id="modal-inventory" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 id="modal-inv-title" class="font-bold text-sm text-loft-900 dark:text-amber-200">إضافة مادة خام</h3>
+        <button onclick="app.closeModal('modal-inventory')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-inventory" onsubmit="app.saveInventoryItem(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="inv-form-id">
+        <div>
+          <label class="block font-bold mb-1">اسم المادة الخام</label>
+          <input type="text" id="inv-form-name" required placeholder="حبوب قهوة كولومبية، حليب المراعي..." class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-bold mb-1">الكمية المتوفرة</label>
+            <input type="number" id="inv-form-qty" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">الوحدة</label>
+            <input type="text" id="inv-form-unit" required placeholder="كغم، لتر، عبوة..." class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">حد التنبيه</label>
+            <input type="number" id="inv-form-min" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 font-mono">
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-inventory')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-loft-800 dark:bg-amber-500 text-white dark:text-loft-950 font-bold">حفظ المادة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add Task (With Start Date & End Date) -->
+  <div id="modal-task" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 id="modal-task-title" class="font-bold text-sm text-loft-900 dark:text-amber-200">إضافة مهمة تشغيلية جديدة</h3>
+        <button onclick="app.closeModal('modal-task')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-task" onsubmit="app.saveTask(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="task-form-id">
+        <div>
+          <label class="block font-bold mb-1">عنوان المهمة</label>
+          <input type="text" id="task-form-title" required placeholder="تنظيف آلة الإسبريسو، جرد الصندوق..." class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">الموظف المكلف</label>
+          <input type="text" id="task-form-assignee" required placeholder="اسم الباريستا أو الكاشير" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1">تاريخ ووقت البداية</label>
+            <input type="datetime-local" id="task-form-start" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">تاريخ ووقت النهاية</label>
+            <input type="datetime-local" id="task-form-end" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-task')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-loft-800 dark:bg-amber-500 text-white dark:text-loft-950 font-bold">حفظ المهمة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Cashflow Entry (Inflow / Outflow) -->
+  <div id="modal-cashflow" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 id="modal-cashflow-title" class="font-bold text-sm text-loft-900 dark:text-amber-200">تسجيل حركة مالية</h3>
+        <button onclick="app.closeModal('modal-cashflow')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-cashflow" onsubmit="app.saveCashflowEntry(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="cashflow-form-type" value="in">
+        <div>
+          <label class="block font-bold mb-1">المبلغ بالشيقل (₪)</label>
+          <input type="number" step="0.5" id="cashflow-form-amount" required class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800 font-mono text-base font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">البيان / الوصف</label>
+          <input type="text" id="cashflow-form-reason" required placeholder="شراء حليب، صيانة طاحونة، عهدة إضافية..." class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">التصنيف</label>
+          <select id="cashflow-form-category" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+            <option value="خامات ومشتريات">خامات ومشتريات قهوة</option>
+            <option value="صيانة وتشغيل">صيانة وتشغيل آلات</option>
+            <option value="رواتب ويوميات">رواتب ويوميات</option>
+            <option value="إيراد إضافي">إيراد خارجي / إضافي</option>
+            <option value="نثريات">نثريات وضيافة</option>
+          </select>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-cashflow')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold">تسجيل الحركة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Promo Code Modal (With Condition Breakdown) -->
+  <div id="modal-promo" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 id="modal-promo-title" class="font-bold text-sm text-loft-900 dark:text-amber-200">إضافة كود خصم جديد</h3>
+        <button onclick="app.closeModal('modal-promo')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-promo" onsubmit="app.savePromoCode(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="promo-form-id">
+        <div>
+          <label class="block font-bold mb-1">كود الخصم (Promo Code)</label>
+          <input type="text" id="promo-form-code" required placeholder="LOFT20" class="w-full px-3 py-2 uppercase font-mono rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1">نوع الخصم</label>
+            <select id="promo-form-type" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+              <option value="percent">نسبة مئوية (%)</option>
+              <option value="fixed">مبلغ ثابت (₪)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">القيمة</label>
+            <input type="number" id="promo-form-val" required placeholder="15" class="w-full px-3 py-2 font-mono rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold mb-1 text-caramel dark:text-amber-300">شرط وحالة استحقاق الخصم (مهم جداً)</label>
+          <textarea id="promo-form-condition" required rows="2.5" placeholder="مثال: يمنح للزبائن في زيارتهم الأولى، أو عند الشراء بأكثر من 100 شيقل، أو خلال ساعات الصباح الذهبية (8-11 ص)" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800"></textarea>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-promo')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-loft-800 dark:bg-amber-500 text-white dark:text-loft-950 font-bold">حفظ الكود</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Customer 24h Traffic Counter Modal -->
+  <div id="modal-visitor" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 class="font-bold text-sm text-loft-900 dark:text-amber-200 flex items-center gap-2">
+          <i class="fa-solid fa-users text-caramel"></i>
+          <span>حساب وعداد زوار المقهى (24 ساعة)</span>
+        </h3>
+        <button onclick="app.closeModal('modal-visitor')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="text-center py-4 bg-loft-100 dark:bg-loft-900 rounded-2xl">
+        <p class="text-xs text-slate-500 mb-1">إجمالي الزبائن الذين زاروا الكافيه اليوم</p>
+        <span id="modal-visitor-number" class="text-5xl font-black font-mono text-caramel dark:text-amber-400">42</span>
+        <p class="text-[11px] text-slate-400 mt-2">يتم التصفير وإعادة الحساب التلقائي كل 24 ساعة</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+        <button onclick="app.incrementVisitors(1)" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow transition">
+          <i class="fa-solid fa-user-plus ml-1"></i> تسجيل زبون (+1)
+        </button>
+        <button onclick="app.incrementVisitors(5)" class="py-2.5 bg-loft-800 dark:bg-amber-500 dark:text-loft-950 hover:bg-loft-900 text-white rounded-xl shadow transition">
+          <i class="fa-solid fa-users ml-1"></i> مجموعة عائلية (+5)
+        </button>
+      </div>
+      <div class="text-center pt-2">
+        <button onclick="app.resetVisitors()" class="text-xs text-rose-500 hover:underline">إعادة ضبط العداد إلى 0</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Feedback & Complaints Modal -->
+  <div id="modal-feedback" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-lg w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 class="font-bold text-sm text-loft-900 dark:text-amber-200 flex items-center gap-2">
+          <i class="fa-regular fa-comments text-purple-600"></i>
+          <span>صندوق آراء وشكاوى زبائن Loft Up</span>
+        </h3>
+        <button onclick="app.closeModal('modal-feedback')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <!-- Add feedback form -->
+      <form id="form-feedback" onsubmit="app.saveFeedback(event)" class="space-y-2.5 text-xs bg-loft-50 dark:bg-loft-900 p-3 rounded-xl">
+        <span class="font-bold text-slate-700 dark:text-slate-300 block">تسجيل رأي أو شكوى جديدة</span>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="feedback-name" placeholder="اسم الزبون (اختياري)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-loft-950 border border-loft-200 dark:border-loft-800">
+          <select id="feedback-type" class="px-3 py-1.5 rounded-lg bg-white dark:bg-loft-950 border border-loft-200 dark:border-loft-800">
+            <option value="complaint">شكوى</option>
+            <option value="praise">ثناء وإعجاب</option>
+            <option value="suggestion">اقتراح تحسين</option>
+          </select>
+        </div>
+        <textarea id="feedback-message" required rows="2" placeholder="تفاصيل الملاحظة أو الشكوى..." class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-loft-950 border border-loft-200 dark:border-loft-800"></textarea>
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-1 text-amber-400" id="feedback-stars">
+            <i class="fa-solid fa-star cursor-pointer" onclick="app.setFeedbackRating(1)"></i>
+            <i class="fa-solid fa-star cursor-pointer" onclick="app.setFeedbackRating(2)"></i>
+            <i class="fa-solid fa-star cursor-pointer" onclick="app.setFeedbackRating(3)"></i>
+            <i class="fa-solid fa-star cursor-pointer" onclick="app.setFeedbackRating(4)"></i>
+            <i class="fa-solid fa-star cursor-pointer" onclick="app.setFeedbackRating(5)"></i>
+          </div>
+          <button type="submit" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold">تسجيل الملاحظة</button>
+        </div>
+      </form>
+
+      <!-- Feedback list container -->
+      <div id="feedback-list-container" class="max-h-60 overflow-y-auto space-y-2 pr-1">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 8: Shift Attendance Check-in/out -->
+  <div id="modal-shift" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-loft-950 max-w-md w-full rounded-2xl border border-loft-200 dark:border-loft-800 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-3">
+        <h3 class="font-bold text-sm text-loft-900 dark:text-amber-200 flex items-center gap-2">
+          <i class="fa-solid fa-fingerprint text-emerald-600"></i>
+          <span>تسجيل حضور ونوبات الموظفين (Shifts)</span>
+        </h3>
+        <button onclick="app.closeModal('modal-shift')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="form-shift" onsubmit="app.saveShiftRecord(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold mb-1">اسم الموظف</label>
+          <input type="text" id="shift-emp-name" required placeholder="مثال: أحمد (باريستا صباحي)" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">نوع الإجراء</label>
+          <select id="shift-action-type" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+            <option value="in">تسجيل حضور (Check-In)</option>
+            <option value="out">تسجيل انصراف (Check-Out)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">تقييم الأداء الحالي (1-5)</label>
+          <select id="shift-emp-rating" class="w-full px-3 py-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+            <option value="5">⭐⭐⭐⭐⭐ ممتاز (5/5)</option>
+            <option value="4">⭐⭐⭐⭐ جيد جداً (4/5)</option>
+            <option value="3">⭐⭐⭐ متوسط (3/5)</option>
+          </select>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="app.closeModal('modal-shift')" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-loft-900 font-semibold">إلغاء</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold">تأكيد التسجيل</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PRINT RECEIPT TEMPLATE (Hidden from screen, visible during print) -->
+  <div id="print-receipt-section" class="hidden text-black bg-white font-mono text-xs leading-tight">
+    <div class="text-center pb-2 border-b border-black">
+      <h2 class="text-base font-black tracking-wider">LOFT UP COFFEE</h2>
+      <p class="text-[10px]">كوفي شوب - إدارة المبيعات</p>
+      <p id="pr-datetime" class="text-[9px]">2026-09-05 00:00:00</p>
+      <p id="pr-order-no" class="font-bold text-xs mt-1">فاتورة رقم: #0001</p>
+      <p id="pr-table-no" class="font-bold">طاولة 1</p>
+    </div>
+    
+    <div class="py-2 border-b border-black space-y-1" id="pr-items-container">
+      <!-- Items table injected here -->
+    </div>
+    
+    <div class="py-2 border-b border-black space-y-0.5 text-right">
+      <div class="flex justify-between">
+        <span>المجموع:</span>
+        <span id="pr-subtotal">0 ₪</span>
+      </div>
+      <div class="flex justify-between">
+        <span>الخصم:</span>
+        <span id="pr-discount">0 ₪</span>
+      </div>
+      <div class="flex justify-between font-bold text-sm pt-1 border-t border-black">
+        <span>الصافي المطلوب:</span>
+        <span id="pr-total">0 ₪</span>
+      </div>
+      <div class="flex justify-between text-[10px] text-gray-700">
+        <span>طريقة الدفع:</span>
+        <span id="pr-payment">نقدي (Cash)</span>
+      </div>
+    </div>
+    
+    <div class="text-center pt-2 text-[10px]">
+      <p>شكراً لزيارتكم Loft Up</p>
+      <p>نتمنى لكم يوماً رائعاً وقهوة لذيذة!</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT LOGIC & STATE ENGINE -->
+  <!-- ============================================================ -->
+  <script>
+    // Audio synthesizer helper via Tone.js (No external sound file dependencies)
+    const soundEffects = {
+      playBeep: () => {
+        try {
+          const synth = new Tone.Synth({
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+          }).toDestination();
+          synth.triggerAttackRelease('C5', '8n');
+        } catch (e) {
+          // Tone audio context might need interaction
+        }
+      },
+      playSuccess: () => {
+        try {
+          const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+          synth.triggerAttackRelease(['E5', 'G5', 'B5'], '16n');
+        } catch (e) {}
+      },
+      playAlert: () => {
+        try {
+          const synth = new Tone.Synth().toDestination();
+          synth.triggerAttackRelease('F4', '16n');
+        } catch (e) {}
+      }
+    };
+
+    // Initial catalog strictly respecting user pricing & requested items
+    const DEFAULT_PRODUCTS = [
+      // Cold Drinks (مشروبات باردة)
+      { id: 'c1', name: 'عصير طبيعي', cat: 'cold', price: 15, img: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=400&q=80', ing: 'فواكه طازجة، ثلج' },
+      { id: 'c2', name: 'سموذي منعش', cat: 'cold', price: 20, img: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?auto=format&fit=crop&w=400&q=80', ing: 'فراولة، موز، توت، حليب' },
+      { id: 'c3', name: 'موهيتو بنكهات', cat: 'cold', price: 20, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80', ing: 'نعناع، ليمون، سيروب، صودا' },
+      { id: 'c4', name: 'فرابتشينو كافيه', cat: 'cold', price: 20, img: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=400&q=80', ing: 'إسبريسو، صوص شوكولاتة، كريمة' },
+      { id: 'c5', name: 'ملك شيك مثلج', cat: 'cold', price: 20, img: 'https://images.unsplash.com/photo-1579954115563-e72bf1381629?auto=format&fit=crop&w=400&q=80', ing: 'آيس كريم فانيليا، حليب، ميكس' },
+      { id: 'c6', name: 'ايس كوفي / لاتيه', cat: 'cold', price: 20, img: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=400&q=80', ing: 'دبل شوت إسبريسو، حليب بارد، ثلج' },
+      { id: 'c7', name: 'مشروب طاقة ميكس', cat: 'cold', price: 30, img: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?auto=format&fit=crop&w=400&q=80', ing: 'مشروب طاقة، نكهات توت أزرق' },
+
+      // Hot Drinks (مشروبات ساخنة)
+      { id: 'h1', name: 'شاي فاخر', cat: 'hot', price: 5, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80', ing: 'أوراق شاي سيلاني، ميرمية / نعناع' },
+      { id: 'h2', name: 'نس كافيه كلاسيك', cat: 'hot', price: 7, img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80', ing: 'قهوة سريعة التحضير، حليب ساخن' },
+      { id: 'h3', name: 'قهوه تركية أصيلة', cat: 'hot', price: 10, img: 'https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&w=400&q=80', ing: 'بن مطحون مع هال' },
+      { id: 'h4', name: 'قهوه اسبريسو سنجل/دبل', cat: 'hot', price: 15, img: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=400&q=80', ing: 'خلاصة حبوب البن المركزة 100%' },
+      { id: 'h5', name: 'كافي لاتيه كريمي', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=400&q=80', ing: 'إسبريسو، حليب مبخر، فوم خفيف' },
+      { id: 'h6', name: 'كافي موكا شوكليت', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1607681034540-2c46cc71896d?auto=format&fit=crop&w=400&q=80', ing: 'إسبريسو، كاكاو بلجيكي، حليب' },
+      { id: 'h7', name: 'سبانش لاتيه غني', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=400&q=80', ing: 'إسبريسو، حليب مكثف محلى، حليب' },
+      { id: 'h8', name: 'هوت شوكليت مارشميلو', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=400&q=80', ing: 'شوكولاتة ذائبة، حليب ساخن' },
+      { id: 'h9', name: 'هوت سيدر قرفة', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=400&q=80', ing: 'عصير تفاح متبل بالقرفة الطبيعية' },
+      { id: 'h10', name: 'كراميل مكياتو دافئ', cat: 'hot', price: 20, img: 'https://images.unsplash.com/photo-1485808191629-c7645c0869cb?auto=format&fit=crop&w=400&q=80', ing: 'فانيلا سيروب، حليب، إسبريسو، كراميل' },
+      { id: 'h11', name: 'امريكانو نقي', cat: 'hot', price: 10, img: 'https://images.unsplash.com/photo-1551030173-122aabc4489c?auto=format&fit=crop&w=400&q=80', ing: 'إسبريسو ممدد بالماء الساخن' },
+
+      // Sweets & Cakes (الحلويات والكيك)
+      { id: 's1', name: 'كريب شوكولاتة وفواكه', cat: 'sweets', price: 25, img: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=400&q=80', ing: 'عجينة كريب طازجة، نوتيلا، فراولة' },
+      { id: 's2', name: 'تشيز كيك نيويورك', cat: 'sweets', price: 10, img: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=400&q=80', ing: 'جبن كريمي، بسكويت مقرمش، صوص توت' },
+      { id: 's3', name: 'كيك الهبة المميز', cat: 'sweets', price: 20, img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80', ing: 'كيك الشوكولاتة الذائبة والكراميل' },
+      { id: 's4', name: 'قشطوطة الحليب', cat: 'sweets', price: 15, img: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=400&q=80', ing: 'كيكة حليب مسقية بقشطة بلدي ومكسرات' },
+      { id: 's5', name: 'دبي بومب المقرمش', cat: 'sweets', price: 15, img: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=400&q=80', ing: 'شوكولاتة دبي الشهيرة، كنافة وفستق' },
+      { id: 's6', name: 'بمبوظة Loft Up', cat: 'sweets', price: 15, img: 'https://images.unsplash.com/photo-1557142046-c704a3adf364?auto=format&fit=crop&w=400&q=80', ing: 'حلوى الآيسكريم مع كرات البسكويت' },
+      { id: 's7', name: 'كركوبة اللذيذة', cat: 'sweets', price: 10, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80', ing: 'كرات كيك محشوة بالنوتيلا وصوص اللوتس' },
+      { id: 's8', name: 'كيك قطعة فردية', cat: 'sweets', price: 10, img: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=400&q=80', ing: 'قطعة كيك طازجة من اختيارك' },
+      { id: 's9', name: 'قالب كيك صغير', cat: 'sweets', price: 50, img: 'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=400&q=80', ing: 'تكفي 2-4 أشخاص' },
+      { id: 's10', name: 'قالب كيك وسط', cat: 'sweets', price: 70, img: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?auto=format&fit=crop&w=400&q=80', ing: 'تكفي 6-8 أشخاص' },
+      { id: 's11', name: 'قالب كيك كبير', cat: 'sweets', price: 100, img: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?auto=format&fit=crop&w=400&q=80', ing: 'تكفي 10-12 شخص' },
+      { id: 's12', name: 'بلاطة كيك كاملة', cat: 'sweets', price: 200, img: 'https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=400&q=80', ing: 'للحفلات والمناسبات الكبيرة' },
+      { id: 's13', name: 'كيك 3 طوابق فخم', cat: 'sweets', price: 300, img: 'https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&w=400&q=80', ing: 'كيك مناسبات وأعراس 3 أدوار مزين فاخر' }
+    ];
+
+    // Initial Default Inventory Items
+    const DEFAULT_INVENTORY = [
+      { id: 'inv_1', name: 'حبوب بن سبيشالتي (كولومبي)', qty: 14, unit: 'كغم', min: 5 },
+      { id: 'inv_2', name: 'حبوب بن اسبريسو هاوس بلند', qty: 22, unit: 'كغم', min: 8 },
+      { id: 'inv_3', name: 'حليب كامل الدسم طازج', qty: 35, unit: 'لتر', min: 10 },
+      { id: 'inv_4', name: 'أكواب ورقية ساخنة 8oz', qty: 120, unit: 'حبة', min: 100 },
+      { id: 'inv_5', name: 'أكواب بلاستيكية باردة 12oz', qty: 45, unit: 'حبة', min: 50 }, // Low stock!
+      { id: 'inv_6', name: 'سيروب كراميل وفانيليا', qty: 4, unit: 'زجاجة', min: 2 },
+      { id: 'inv_7', name: 'شوكولاتة نوتيلا وكاكاو', qty: 7, unit: 'كغم', min: 3 }
+    ];
+
+    // Initial Default Tasks (With Start Date and End Date)
+    const DEFAULT_TASKS = [
+      { id: 't_1', title: 'جرد الصندوق الصباحي ومطابقة الكاش', assignee: 'محمود (كاشير)', start: '2026-09-05T08:00', end: '2026-09-05T08:30', status: 'done' },
+      { id: 't_2', title: 'تنظيف ومعايرة آلة الإسبريسو ومطاحن البن', assignee: 'سامر (باريستا)', start: '2026-09-05T08:30', end: '2026-09-05T09:00', status: 'in_progress' },
+      { id: 't_3', title: 'استلام وتدقيق شحنة الحليب والحلويات الطازجة', assignee: 'رامي (مشرف)', start: '2026-09-05T11:00', end: '2026-09-05T12:00', status: 'pending' },
+      { id: 't_4', title: 'جرد وإقفال درج النقود لوردية المساء', assignee: 'محمود (كاشير)', start: '2026-09-05T22:00', end: '2026-09-05T22:30', status: 'pending' }
+    ];
+
+    // Initial Promo Codes with Explicit Condition
+    const DEFAULT_PROMOS = [
+      { id: 'p_1', code: 'LOFT10', val: 10, type: 'percent', condition: 'خصم 10% ترحيبي للزبون في الزيارة الأولى أو الطلبات السريعة' },
+      { id: 'p_2', code: 'HAPPYHOUR', val: 15, type: 'percent', condition: 'ساعة السعادة: يمنح للزبون عند الطلب بين الساعة 4 إلى 6 مساءً' },
+      { id: 'p_3', code: 'VIP20', val: 20, type: 'fixed', condition: 'خصم بقيمة 20 ₪ للزبائن المميزين عند زيادة الفاتورة عن 100 ₪' }
+    ];
+
+    const app = {
+      state: {
+        products: [],
+        inventory: [],
+        tasks: [],
+        promos: [],
+        orders: [],
+        cashflow: [],
+        feedback: [],
+        shifts: [],
+        visitors24h: 42,
+        visitorsLastReset: Date.now(),
+        cart: [],
+        currentCategory: 'all',
+        selectedTable: 'طاولة 1',
+        appliedPromo: null,
+        isOfflineSimulated: false,
+        lang: 'ar',
+        currentRatingTemp: 5
+      },
+
+      init() {
+        // Load persisted data or default fallback
+        this.loadStateFromStorage();
+        
+        // Setup Live Clock
+        this.startClock();
+
+        // Render initial UI views
+        this.renderPosProducts();
+        this.renderCart();
+        this.renderKds();
+        this.renderOrdersArchive();
+        this.renderMenuTable();
+        this.renderInventory();
+        this.renderTasks();
+        this.renderShifts();
+        this.renderPromos();
+        this.renderCashflow();
+        this.renderFeedback();
+        this.updateVisitorCounterUI();
+
+        // Auto Save Listener
+        window.addEventListener('storage', () => this.loadStateFromStorage());
+        
+        // Listen to window online / offline events
+        window.addEventListener('online', () => this.handleNetworkChange(true));
+        window.addEventListener('offline', () => this.handleNetworkChange(false));
+      },
+
+      loadStateFromStorage() {
+        try {
+          this.state.products = JSON.parse(localStorage.getItem('loft_products')) || DEFAULT_PRODUCTS;
+          this.state.inventory = JSON.parse(localStorage.getItem('loft_inventory')) || DEFAULT_INVENTORY;
+          this.state.tasks = JSON.parse(localStorage.getItem('loft_tasks')) || DEFAULT_TASKS;
+          this.state.promos = JSON.parse(localStorage.getItem('loft_promos')) || DEFAULT_PROMOS;
+          this.state.orders = JSON.parse(localStorage.getItem('loft_orders')) || [];
+          this.state.cashflow = JSON.parse(localStorage.getItem('loft_cashflow')) || [
+            { id: 'c_init_1', type: 'in', amount: 350, reason: 'رصيد افتتاحي لدرج الكاشير', category: 'إيراد إضافي', time: new Date().toISOString() },
+            { id: 'c_init_2', type: 'out', amount: 60, reason: 'شراء عبوات ثلج ومناديل', category: 'نثريات', time: new Date().toISOString() }
+          ];
+          this.state.feedback = JSON.parse(localStorage.getItem('loft_feedback')) || [
+            { id: 'fb_1', name: 'أنس كنعان', rating: 5, type: 'praise', message: 'أفضل سبانش لاتيه وكيكة قشطوطة تذوقتها، أجواء المقهى راقية جداً!', time: new Date().toISOString() }
+          ];
+          this.state.shifts = JSON.parse(localStorage.getItem('loft_shifts')) || [
+            { id: 'sh_1', name: 'سامر ناصر', action: 'in', time: '08:00 ص', rating: 5 },
+            { id: 'sh_2', name: 'محمود خليل', action: 'in', time: '07:45 ص', rating: 5 }
+          ];
+          this.state.visitors24h = parseInt(localStorage.getItem('loft_visitors') || '42', 10);
+        } catch (e) {
+          console.warn('LocalStorage error or fresh start:', e);
+        }
+      },
+
+      persist(key, data) {
+        try {
+          localStorage.setItem('loft_' + key, JSON.stringify(data));
+        } catch (e) {
+          console.error('Storage full or error:', e);
+        }
+      },
+
+      startClock() {
+        const update = () => {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString(this.state.lang === 'ar' ? 'ar-EG' : 'en-US', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+          });
+          const dateStr = now.toLocaleDateString(this.state.lang === 'ar' ? 'ar-EG' : 'en-US', {
+            weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
+          });
+
+          const clockElem = document.getElementById('live-digital-clock');
+          const dateElem = document.getElementById('live-digital-date');
+          if (clockElem) clockElem.textContent = timeStr;
+          if (dateElem) dateElem.textContent = dateStr;
+        };
+        update();
+        setInterval(update, 1000);
+      },
+
+      toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('loft_theme', isDark ? 'dark' : 'light');
+        this.notify(isDark ? 'تم تفعيل النمط الليلي 🌙' : 'تم تفعيل النمط الفاتح ☀️', 'info');
+      },
+
+      toggleLanguage() {
+        this.state.lang = this.state.lang === 'ar' ? 'en' : 'ar';
+        document.documentElement.setAttribute('dir', this.state.lang === 'ar' ? 'rtl' : 'ltr');
+        document.documentElement.setAttribute('lang', this.state.lang);
+        
+        const label = document.getElementById('current-lang-label');
+        if (label) label.textContent = this.state.lang === 'ar' ? 'English' : 'العربية';
+        
+        this.notify(this.state.lang === 'ar' ? 'تم تحويل اللغة إلى العربية' : 'Switched to English', 'info');
+        this.renderPosProducts();
+        this.renderCart();
+      },
+
+      toggleOfflineSimulation() {
+        this.state.isOfflineSimulated = !this.state.isOfflineSimulated;
+        this.handleNetworkChange(!this.state.isOfflineSimulated);
+      },
+
+      handleNetworkChange(isOnline) {
+        const badge = document.getElementById('network-status-badge');
+        const txt = document.getElementById('txt-online-status');
+        if (isOnline) {
+          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300";
+          badge.querySelector('span').className = "w-2 h-2 rounded-full bg-emerald-500 animate-ping";
+          txt.textContent = "متصل (أونلاين)";
+          this.notify('تم الاتصال بالسحابة - المزامنة فورية', 'success');
+        } else {
+          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-300";
+          badge.querySelector('span').className = "w-2 h-2 rounded-full bg-amber-500";
+          txt.textContent = "أوفلاين (حفظ محلي مفعّل)";
+          this.notify('أنت تعمل بدون اتصال - الطلبات تحفظ محلياً والطباعة فورية', 'warning');
+        }
+      },
+
+      switchTab(tabName) {
+        // Toggle tab contents
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        const activeTab = document.getElementById('view-' + tabName);
+        if (activeTab) activeTab.classList.remove('hidden');
+
+        // Style tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          if (btn.getAttribute('data-tab') === tabName) {
+            btn.className = "tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition shadow-sm font-bold";
+          } else {
+            btn.className = "tab-btn px-4 py-2 rounded-xl flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-loft-100 dark:hover:bg-loft-900 transition font-semibold";
+          }
+        });
+      },
+
+      setPosCategory(cat) {
+        this.state.currentCategory = cat;
+        document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+          btn.className = "cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-100 dark:bg-loft-900 text-slate-700 dark:text-slate-200 hover:bg-loft-200 dark:hover:bg-loft-800 transition";
+        });
+        const activeBtn = document.getElementById('cat-btn-' + cat);
+        if (activeBtn) {
+          activeBtn.className = "cat-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition";
+        }
+        this.renderPosProducts();
+      },
+
+      renderPosProducts() {
+        const container = document.getElementById('pos-products-grid');
+        if (!container) return;
+
+        const query = (document.getElementById('pos-search-input')?.value || '').trim().toLowerCase();
+        
+        const filtered = this.state.products.filter(p => {
+          const matchCat = this.state.currentCategory === 'all' || p.cat === this.state.currentCategory;
+          const matchQuery = p.name.toLowerCase().includes(query) || (p.ing && p.ing.toLowerCase().includes(query));
+          return matchCat && matchQuery;
         });
 
-        function renderCurrentDate() {
-            const dateElem = document.getElementById('currentDateDisplay');
-            if (!dateElem) return;
-            try {
-                const now = new Date();
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                dateElem.innerText = now.toLocaleDateString('ar-EG', options);
-            } catch (e) {
-                dateElem.innerText = new Date().toLocaleDateString();
-            }
+        if (filtered.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full py-12 text-center text-slate-400">
+              <i class="fa-solid fa-cookie-bite text-3xl mb-2 text-loft-300"></i>
+              <p class="text-xs">لم يتم العثور على أصناف مطابقة للبحث</p>
+            </div>
+          `;
+          return;
         }
 
-        /* إدارة السمة مع تأكيد الوضع الفاتح (Light Mode) كوضع افتراضي رئيسي */
-        function loadTheme() {
-            // اعتماد الوضع الفاتح كافتراضي إذا لم يتم حفظ اختيار مسبق
-            const savedTheme = localStorage.getItem('unitask_theme') || 'light';
-            const html = document.documentElement;
-            const icon = document.getElementById('themeIcon');
-            const text = document.getElementById('themeText');
-
-            if (savedTheme === 'dark') {
-                html.classList.add('dark');
-                html.classList.remove('light');
-                if (icon) icon.innerText = '☀️';
-                if (text) text.innerText = 'الوضع الفاتح';
-            } else {
-                // تأكيد الوضع الفاتح كإعداد افتراضي
-                html.classList.remove('dark');
-                html.classList.add('light');
-                localStorage.setItem('unitask_theme', 'light');
-                if (icon) icon.innerText = '🌙';
-                if (text) text.innerText = 'الوضع الليلي';
-            }
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.classList.contains('dark');
-            const icon = document.getElementById('themeIcon');
-            const text = document.getElementById('themeText');
-
-            if (isDark) {
-                html.classList.remove('dark');
-                html.classList.add('light');
-                localStorage.setItem('unitask_theme', 'light');
-                icon.innerText = '🌙';
-                text.innerText = 'الوضع الليلي';
-                showToast('تم تفعيل الوضع الفاتح (الافتراضي)', 'المظهر', '☀️');
-            } else {
-                html.classList.add('dark');
-                html.classList.remove('light');
-                localStorage.setItem('unitask_theme', 'dark');
-                icon.innerText = '☀️';
-                text.innerText = 'الوضع الفاتح';
-                showToast('تم تفعيل الوضع الليلي', 'المظهر', '🌙');
-            }
-        }
-
-        function displayNextHint() {
-            const index = Math.floor(Math.random() * startupWisdomList.length);
-            const chosen = startupWisdomList[index];
-            const catElem = document.getElementById('tipCategory');
-            const textElem = document.getElementById('tipText');
-
-            if (!catElem || !textElem) return;
-
-            // تلاشٍ سريع ومريح عند استبدال النص
-            textElem.style.opacity = '0';
-            setTimeout(() => {
-                catElem.innerText = chosen.category;
-                textElem.innerText = chosen.text;
-                textElem.style.opacity = '1';
-            }, 160);
-        }
-
-        /* إغلاق التلميح العائم بحركة انسيابية هابطة */
-        function closeFloatingHint() {
-            const banner = document.getElementById('startupBanner');
-            if (!banner || banner.classList.contains('floating-hint-exit')) return;
-
-            banner.classList.remove('floating-bobbing');
-            banner.classList.remove('floating-hint-enter');
-            banner.classList.add('floating-hint-exit');
-
-            setTimeout(() => {
-                banner.classList.add('hidden');
-                banner.classList.remove('floating-hint-exit');
-                const reopenBtn = document.getElementById('reopenHintBtn');
-                if (reopenBtn) {
-                    reopenBtn.classList.remove('hidden');
-                    reopenBtn.classList.add('animate-enter');
-                }
-            }, 380);
-        }
-
-        /* إعادة إظهار التلميح العائم بحركة صاعدة مريحة */
-        function reopenFloatingHint() {
-            const banner = document.getElementById('startupBanner');
-            const reopenBtn = document.getElementById('reopenHintBtn');
-
-            if (reopenBtn) reopenBtn.classList.add('hidden');
-            if (!banner) return;
-
-            displayNextHint();
-            banner.classList.remove('hidden');
-            banner.classList.remove('floating-hint-exit');
-            banner.classList.add('floating-hint-enter');
-
-            setTimeout(() => {
-                banner.classList.add('floating-bobbing');
-            }, 550);
-        }
-
-        function toggleAudio() {
-            soundEnabled = !soundEnabled;
-            const icon = document.getElementById('soundIcon');
-            const text = document.getElementById('soundText');
-            if (soundEnabled) {
-                if (icon) icon.innerText = '🔔';
-                if (text) text.innerText = 'الصوت مُفعل';
-                showToast('تم تفعيل التنبيهات الصوتية', 'إعدادات الصوت', '🔔');
-                playChime('start');
-            } else {
-                if (icon) icon.innerText = '🔕';
-                if (text) text.innerText = 'الصوت مكتوم';
-                showToast('تم كتم التنبيهات الصوتية', 'إعدادات الصوت', '🔕');
-            }
-        }
-
-        function playChime(type = 'start') {
-            if (!soundEnabled) return;
-            try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                const now = audioCtx.currentTime;
-                if (type === 'complete') {
-                    // نغمة نجاح احتفالية متدرجة
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.1);
-                    osc.frequency.setValueAtTime(783.99, now + 0.2);
-                    gain.gain.setValueAtTime(0.14, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                    osc.start(now);
-                    osc.stop(now + 0.5);
-                } else if (type === 'deadline') {
-                    // نغمة تنبيه مهلة الإنجاز
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.setValueAtTime(330, now + 0.15);
-                    gain.gain.setValueAtTime(0.16, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-                    osc.start(now);
-                    osc.stop(now + 0.4);
-                } else {
-                    // نغمة هادئة لبدء المذاكرة
-                    osc.frequency.setValueAtTime(587.33, now);
-                    osc.frequency.setValueAtTime(880, now + 0.12);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-                    osc.start(now);
-                    osc.stop(now + 0.35);
-                }
-            } catch (e) {
-                // تجاوز هادئ في حال تقييد الصوت من المتصفح
-            }
-        }
-
-        function loadStoredTasks() {
-            const stored = localStorage.getItem('unitask_items');
-            if (stored) {
-                try {
-                    tasks = JSON.parse(stored);
-                } catch (e) {
-                    tasks = [];
-                }
-            } else {
-                // مهام نموذجية استرشادية للبداية
-                tasks = [
-                    {
-                        id: 'task-demo-1',
-                        title: 'مراجعة ومناقشة تقرير مشروع التخرج',
-                        course: 'مشروع التخرج',
-                        startTime: '09:00',
-                        endTime: '11:00',
-                        priority: 'high',
-                        completed: false,
-                        notifiedStart: true,
-                        notifiedEnd: false
-                    },
-                    {
-                        id: 'task-demo-2',
-                        title: 'حل واجب تحليل وتصميم الخوارزميات (المسألة 4 و 5)',
-                        course: 'خوارزميات 2',
-                        startTime: '13:30',
-                        endTime: '15:00',
-                        priority: 'medium',
-                        completed: false,
-                        notifiedStart: false,
-                        notifiedEnd: false
-                    }
-                ];
-                saveTasks();
-            }
-        }
-
-        function saveTasks() {
-            localStorage.setItem('unitask_items', JSON.stringify(tasks));
-        }
-
-        function handleAddTask(event) {
-            event.preventDefault();
-
-            const titleInput = document.getElementById('taskTitle');
-            const courseInput = document.getElementById('taskCourse');
-            const startInput = document.getElementById('taskStartTime');
-            const endInput = document.getElementById('taskEndTime');
-            const priorityInput = document.getElementById('taskPriority');
-
-            const title = titleInput.value.trim();
-            const course = courseInput.value.trim() || 'عام / جامعي';
-            const startTime = startInput.value;
-            const endTime = endInput.value;
-            const priority = priorityInput.value;
-
-            if (!title || !startTime || !endTime) return;
-
-            // التحقق من أن وقت النهاية بعد وقت البداية
-            if (endTime <= startTime) {
-                showToast('تنبيه: يُفضل أن يكون وقت نهاية المهمة لاحقاً لوقت بدايتها!', 'ملاحظة زمنية', '⚠️');
-            }
-
-            const newTask = {
-                id: 'task-' + Date.now(),
-                title: title,
-                course: course,
-                startTime: startTime,
-                endTime: endTime,
-                priority: priority,
-                completed: false,
-                notifiedStart: false,
-                notifiedEnd: false
-            };
-
-            tasks.push(newTask);
-            saveTasks();
-            renderTaskList();
-            updateStats();
-
-            // تفريغ المدخلات بعد الإضافة
-            titleInput.value = '';
-            courseInput.value = '';
+        container.innerHTML = filtered.map(p => `
+          <div onclick="app.addToCart('${p.id}')" class="group bg-white dark:bg-loft-950 rounded-2xl border border-loft-200 dark:border-loft-900 overflow-hidden shadow-sm hover:shadow-md hover:border-caramel/50 dark:hover:border-amber-400/50 transition cursor-pointer flex flex-col justify-between">
+            <div class="relative h-28 w-full overflow-hidden bg-loft-100 dark:bg-loft-900">
+              <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.src='https://placehold.co/400x300/3d251d/fff?text=Loft+Up'" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[10px] font-black bg-black/60 backdrop-blur-md text-amber-300 font-mono">
+                ${p.price} ₪
+              </span>
+              <span class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md text-[9px] font-bold ${p.cat === 'cold' ? 'bg-cyan-900/80 text-cyan-200' : p.cat === 'hot' ? 'bg-amber-900/80 text-amber-200' : 'bg-rose-900/80 text-rose-200'}">
+                ${p.cat === 'cold' ? 'بارد' : p.cat === 'hot' ? 'ساخن' : 'حلويات'}
+              </span>
+            </div>
             
-            showToast(`تم جدولتها من ${startTime} حتى ${endTime}`, 'أُضيفت المهمة بنجاح', '📅');
-            playChime('start');
+            <div class="p-2.5 flex-1 flex flex-col justify-between">
+              <div>
+                <h4 class="font-bold text-xs text-loft-950 dark:text-amber-100 group-hover:text-caramel transition line-clamp-1">${p.name}</h4>
+                <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">${p.ing || 'مكونات كافيه طازجة'}</p>
+              </div>
+              <button type="button" class="mt-2 w-full py-1.5 rounded-xl bg-loft-50 dark:bg-loft-900 group-hover:bg-loft-800 dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-loft-950 text-slate-700 dark:text-slate-300 text-[11px] font-bold flex items-center justify-center gap-1 transition">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>إضافة للطلب</span>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      addToCart(productId) {
+        const item = this.state.products.find(p => p.id === productId);
+        if (!item) return;
+
+        const existing = this.state.cart.find(c => c.id === productId);
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          this.state.cart.push({ ...item, qty: 1 });
+        }
+        soundEffects.playBeep();
+        this.renderCart();
+      },
+
+      changeCartQty(productId, delta) {
+        const item = this.state.cart.find(c => c.id === productId);
+        if (!item) return;
+
+        item.qty += delta;
+        if (item.qty <= 0) {
+          this.state.cart = this.state.cart.filter(c => c.id !== productId);
+        }
+        this.renderCart();
+      },
+
+      removeFromCart(productId) {
+        this.state.cart = this.state.cart.filter(c => c.id !== productId);
+        this.renderCart();
+      },
+
+      clearCart() {
+        this.state.cart = [];
+        this.state.appliedPromo = null;
+        document.getElementById('pos-promo-input').value = '';
+        document.getElementById('applied-promo-info').classList.add('hidden');
+        this.renderCart();
+      },
+
+      selectPosTable(tableName) {
+        this.state.selectedTable = tableName;
+        document.getElementById('selected-table-label').textContent = tableName;
+        document.querySelectorAll('.table-opt-btn').forEach(btn => {
+          if (btn.textContent.trim() === tableName) {
+            btn.className = "table-opt-btn px-2 py-1.5 rounded-lg border border-loft-300 dark:border-loft-800 bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 transition";
+          } else {
+            btn.className = "table-opt-btn px-2 py-1.5 rounded-lg border border-loft-200 dark:border-loft-800 bg-loft-50 dark:bg-loft-900 transition";
+          }
+        });
+      },
+
+      applyPromoCode() {
+        const input = document.getElementById('pos-promo-input');
+        const code = (input.value || '').trim().toUpperCase();
+        if (!code) return;
+
+        const promo = this.state.promos.find(p => p.code.toUpperCase() === code);
+        if (!promo) {
+          this.notify('عذراً، كود الخصم غير صحيح أو منتهي الصلاحية', 'error');
+          return;
         }
 
-        function toggleTaskCompletion(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
+        this.state.appliedPromo = promo;
+        const infoBox = document.getElementById('applied-promo-info');
+        document.getElementById('promo-code-name').textContent = promo.code + ` (${promo.type === 'percent' ? promo.val + '%' : promo.val + ' ₪'})`;
+        document.getElementById('promo-code-condition').textContent = 'الحالة والشرط: ' + promo.condition;
+        infoBox.classList.remove('hidden');
 
-            task.completed = !task.completed;
-            saveTasks();
-            renderTaskList();
-            updateStats();
+        soundEffects.playSuccess();
+        this.notify(`تم تفعيل خصم ${promo.code} بنجاح`, 'success');
+        this.renderCart();
+      },
 
-            if (task.completed) {
-                // إطلاق تأثير القصاصات الملونة (Confetti) احتفالاً بالإنجاز
-                if (typeof confetti === 'function') {
-                    confetti({
-                        particleCount: 50,
-                        spread: 60,
-                        origin: { y: 0.75 }
-                    });
-                }
-                
-                playChime('complete');
-                const randomCheer = completionCheerQuotes[Math.floor(Math.random() * completionCheerQuotes.length)];
-                showToast(randomCheer, 'إنجاز رائع!', '🎉');
-            }
+      removePromoCode() {
+        this.state.appliedPromo = null;
+        document.getElementById('pos-promo-input').value = '';
+        document.getElementById('applied-promo-info').classList.add('hidden');
+        this.renderCart();
+      },
+
+      renderCart() {
+        const container = document.getElementById('cart-items-container');
+        const countBadge = document.getElementById('cart-item-count-badge');
+        if (!container) return;
+
+        const totalQty = this.state.cart.reduce((sum, i) => sum + i.qty, 0);
+        countBadge.textContent = `${totalQty} أصناف`;
+
+        if (this.state.cart.length === 0) {
+          container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-10">
+              <i class="fa-solid fa-mug-saucer text-4xl mb-2 text-loft-300 dark:text-loft-800"></i>
+              <p class="text-xs">السلة فارغة، اختر من القائمة لتسجيل الطلب</p>
+            </div>
+          `;
+          document.getElementById('cart-subtotal-val').textContent = '0 ₪';
+          document.getElementById('cart-discount-val').textContent = '-0 ₪';
+          document.getElementById('cart-total-val').textContent = '0 ₪';
+          return;
         }
 
-        function deleteTask(taskId) {
-            tasks = tasks.filter(t => t.id !== taskId);
-            saveTasks();
-            renderTaskList();
-            updateStats();
-            showToast('تم حذف المهمة من جدولك اليومي', 'تم الحذف', '🗑️');
+        container.innerHTML = this.state.cart.map(item => `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-loft-50 dark:bg-loft-900 border border-loft-100 dark:border-loft-800/80">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <img src="${item.img}" alt="${item.name}" onerror="this.src='https://placehold.co/100x100/3d251d/fff?text=Loft'" class="w-9 h-9 rounded-lg object-cover">
+              <div class="truncate">
+                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${item.name}</h5>
+                <span class="text-[10px] text-slate-400 font-mono">${item.price} ₪ للقطعة</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center border border-loft-200 dark:border-loft-700 rounded-lg overflow-hidden bg-white dark:bg-loft-950">
+                <button onclick="app.changeCartQty('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-xs hover:bg-loft-100 dark:hover:bg-loft-800 font-bold">-</button>
+                <span class="w-6 text-center text-xs font-bold font-mono">${item.qty}</span>
+                <button onclick="app.changeCartQty('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-xs hover:bg-loft-100 dark:hover:bg-loft-800 font-bold">+</button>
+              </div>
+              <span class="text-xs font-bold font-mono w-12 text-left">${item.price * item.qty} ₪</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Calculation
+        const subtotal = this.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        let discount = 0;
+
+        if (this.state.appliedPromo) {
+          if (this.state.appliedPromo.type === 'percent') {
+            discount = (subtotal * this.state.appliedPromo.val) / 100;
+          } else {
+            discount = this.state.appliedPromo.val;
+          }
+        }
+        discount = Math.min(discount, subtotal);
+        const total = Math.max(0, subtotal - discount);
+
+        document.getElementById('cart-subtotal-val').textContent = subtotal.toFixed(2) + ' ₪';
+        document.getElementById('cart-discount-val').textContent = '-' + discount.toFixed(2) + ' ₪';
+        document.getElementById('cart-total-val').textContent = total.toFixed(2) + ' ₪';
+      },
+
+      submitOrder(paymentType) {
+        if (this.state.cart.length === 0) {
+          this.notify('يرجى إضافة أصناف إلى السلة أولاً!', 'warning');
+          return;
         }
 
-        function setFilter(filterType) {
-            currentFilter = filterType;
-            const buttons = {
-                all: document.getElementById('filterAll'),
-                pending: document.getElementById('filterPending'),
-                completed: document.getElementById('filterCompleted')
-            };
+        const subtotal = this.state.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        let discount = 0;
+        if (this.state.appliedPromo) {
+          discount = this.state.appliedPromo.type === 'percent'
+            ? (subtotal * this.state.appliedPromo.val) / 100
+            : this.state.appliedPromo.val;
+        }
+        discount = Math.min(discount, subtotal);
+        const finalAmount = Math.max(0, subtotal - discount);
 
-            Object.keys(buttons).forEach(key => {
-                if (key === filterType) {
-                    buttons[key].className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark text-slate-900 dark:text-white shadow-xs font-bold transition';
-                } else {
-                    buttons[key].className = 'px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition';
-                }
-            });
+        const newOrder = {
+          id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+          table: this.state.selectedTable,
+          items: JSON.parse(JSON.stringify(this.state.cart)),
+          subtotal,
+          discount,
+          finalAmount,
+          paymentType: paymentType === 'cash' ? 'نقدي' : 'إلكتروني',
+          promoUsed: this.state.appliedPromo ? this.state.appliedPromo.code : null,
+          status: 'pending', // pending -> preparing -> completed
+          timestamp: new Date().toISOString()
+        };
 
-            renderTaskList();
+        // Save order
+        this.state.orders.unshift(newOrder);
+        this.persist('orders', this.state.orders);
+
+        // Auto record cash Inflow (الوارد)
+        const cashEntry = {
+          id: 'cf_' + Date.now(),
+          type: 'in',
+          amount: finalAmount,
+          reason: `مبيعات طلب ${newOrder.id} (${newOrder.table})`,
+          category: 'مبيعات طلبات',
+          time: new Date().toISOString()
+        };
+        this.state.cashflow.unshift(cashEntry);
+        this.persist('cashflow', this.state.cashflow);
+
+        // Auto increment visitor counter
+        this.incrementVisitors(1, true);
+
+        // Deduct rough inventory simulation
+        this.deductInventorySimulation(newOrder.items);
+
+        // Audio and print
+        soundEffects.playSuccess();
+        this.notify(`تم تسجيل الطلب #${newOrder.id} وإرساله لشاشة التحضير (KDS)`, 'success');
+
+        // Trigger Receipt Print View
+        this.printThermalReceipt(newOrder);
+
+        // Reset Cart
+        this.clearCart();
+
+        // Refresh views
+        this.renderKds();
+        this.renderOrdersArchive();
+        this.renderCashflow();
+      },
+
+      deductInventorySimulation(orderItems) {
+        // Automatically deduct milk and beans based on order items
+        orderItems.forEach(item => {
+          if (item.cat === 'hot' || item.cat === 'cold') {
+            const milk = this.state.inventory.find(i => i.name.includes('حليب'));
+            const beans = this.state.inventory.find(i => i.name.includes('بن'));
+            if (milk && milk.qty > 0) milk.qty = Math.max(0, milk.qty - (0.2 * item.qty));
+            if (beans && beans.qty > 0) beans.qty = Math.max(0, beans.qty - (0.02 * item.qty));
+          }
+        });
+        this.persist('inventory', this.state.inventory);
+        this.renderInventory();
+      },
+
+      printThermalReceipt(order) {
+        const container = document.getElementById('print-receipt-section');
+        if (!container) return;
+
+        document.getElementById('pr-datetime').textContent = new Date(order.timestamp).toLocaleString();
+        document.getElementById('pr-order-no').textContent = 'طلب رقم: ' + order.id;
+        document.getElementById('pr-table-no').textContent = order.table;
+        
+        const itemsBox = document.getElementById('pr-items-container');
+        itemsBox.innerHTML = order.items.map(i => `
+          <div class="flex justify-between">
+            <span>${i.name} (x${i.qty})</span>
+            <span>${(i.price * i.qty).toFixed(2)} ₪</span>
+          </div>
+        `).join('');
+
+        document.getElementById('pr-subtotal').textContent = order.subtotal.toFixed(2) + ' ₪';
+        document.getElementById('pr-discount').textContent = '-' + order.discount.toFixed(2) + ' ₪';
+        document.getElementById('pr-total').textContent = order.finalAmount.toFixed(2) + ' ₪';
+        document.getElementById('pr-payment').textContent = order.paymentType;
+
+        // Print cleanly
+        setTimeout(() => {
+          window.print();
+        }, 200);
+      },
+
+      renderKds() {
+        const container = document.getElementById('kds-cards-container');
+        const badgeCount = document.getElementById('kds-pending-count');
+        if (!container) return;
+
+        const activeOrders = this.state.orders.filter(o => o.status !== 'completed');
+        if (badgeCount) badgeCount.textContent = activeOrders.length;
+
+        if (activeOrders.length === 0) {
+          container.innerHTML = `
+            <div class="col-span-full py-16 text-center text-slate-400 bg-white dark:bg-loft-950 rounded-2xl border border-dashed border-loft-200 dark:border-loft-800">
+              <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-2"></i>
+              <p class="text-sm font-bold">جميع الطلبات جاهزة ومكتملة!</p>
+              <p class="text-xs text-slate-400 mt-1">شاشة تحضير الباريستا خالية من أي طلبات معلقة</p>
+            </div>
+          `;
+          return;
         }
 
-        function renderTaskList() {
-            const container = document.getElementById('tasksContainer');
-            const emptyState = document.getElementById('emptyState');
-            container.innerHTML = '';
+        container.innerHTML = activeOrders.map(order => {
+          const isPreparing = order.status === 'preparing';
+          const timeElapsed = Math.floor((Date.now() - new Date(order.timestamp).getTime()) / 60000);
+          
+          return `
+            <div class="bg-white dark:bg-loft-950 rounded-2xl border ${isPreparing ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' : 'border-amber-400 shadow-sm'} p-4 flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between border-b border-loft-100 dark:border-loft-900 pb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="font-black text-sm text-loft-900 dark:text-amber-200">#${order.id}</span>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-lg bg-loft-100 dark:bg-loft-900 text-caramel">${order.table}</span>
+                  </div>
+                  <span class="text-[11px] font-mono ${timeElapsed > 10 ? 'text-rose-500 font-bold badge-pulse' : 'text-slate-400'}">
+                    <i class="fa-regular fa-clock"></i> منذ ${timeElapsed} دقيقة
+                  </span>
+                </div>
 
-            let filtered = tasks;
-            if (currentFilter === 'pending') {
-                filtered = tasks.filter(t => !t.completed);
-            } else if (currentFilter === 'completed') {
-                filtered = tasks.filter(t => t.completed);
-            }
-
-            if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            } else {
-                emptyState.classList.add('hidden');
-            }
-
-            // ترتيب المهام حسب وقت البداية
-            const sortedTasks = [...filtered].sort((a, b) => a.startTime.localeCompare(b.startTime));
-            const currentTimeStr = getCurrentTimeString();
-
-            sortedTasks.forEach(task => {
-                const isOngoing = !task.completed && (currentTimeStr >= task.startTime && currentTimeStr <= task.endTime);
-                
-                // الألوان حسب الأولوية
-                let priorityBadge = '';
-                if (task.priority === 'high') {
-                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300">أولوية قصوى</span>';
-                } else if (task.priority === 'medium') {
-                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">أولوية متوسطة</span>';
-                } else {
-                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">مرنة</span>';
-                }
-
-                const li = document.createElement('li');
-                li.className = `p-4 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                    task.completed
-                        ? 'bg-slate-50/80 dark:bg-cardDark/40 border-slate-200 dark:border-borderDark opacity-65'
-                        : isOngoing
-                        ? 'bg-white dark:bg-cardDark border-brand-500 shadow-md shadow-brand-500/10 ring-1 ring-brand-500/30'
-                        : 'bg-white dark:bg-cardDark border-slate-200 dark:border-borderDark shadow-xs hover:shadow-md'
-                }`;
-
-                li.innerHTML = `
-                    <div class="flex items-start sm:items-center gap-3.5 flex-1">
-                        <!-- زر الإنجاز الدائري -->
-                        <button onclick="toggleTaskCompletion('${task.id}')" title="${task.completed ? 'إلغاء الإنجاز' : 'تعليم كمكتمل'}"
-                                class="mt-1 sm:mt-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center shrink-0 transition-transform active:scale-90 ${
-                                    task.completed 
-                                    ? 'bg-emeraldCustom border-emeraldCustom text-white' 
-                                    : 'border-slate-300 dark:border-slate-600 hover:border-brand-500'
-                                }">
-                            ${task.completed ? '<svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>' : ''}
-                        </button>
-
-                        <div class="flex-1">
-                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
-                                    ${task.title}
-                                </h3>
-                                ${priorityBadge}
-                                ${isOngoing ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-500 text-white animate-pulse">جارية الآن ⏳</span>' : ''}
-                            </div>
-
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                                <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-medium">
-                                    📚 ${task.course}
-                                </span>
-                                <span class="font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-                                    <span class="text-emerald-500 font-bold">بدء:</span> ${task.startTime}
-                                    <span class="text-slate-300 dark:text-slate-600">|</span>
-                                    <span class="text-rose-500 font-bold">نهاية:</span> ${task.endTime}
-                                </span>
-                            </div>
-                        </div>
+                <div class="py-2 space-y-2">
+                  ${order.items.map(item => `
+                    <div class="flex items-center justify-between text-xs">
+                      <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-md bg-loft-800 text-white dark:bg-amber-500 dark:text-loft-950 flex items-center justify-center font-bold text-[11px]">${item.qty}x</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100">${item.name}</span>
+                      </div>
+                      <span class="text-[10px] text-slate-400">${item.cat === 'hot' ? 'ساخن 🔥' : item.cat === 'cold' ? 'بارد ❄️' : 'حلوى 🍰'}</span>
                     </div>
+                  `).join('')}
+                </div>
+              </div>
 
-                    <!-- أزرار الإجراءات السريعة -->
-                    <div class="flex items-center justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-borderDark">
-                        <button onclick="toggleTaskCompletion('${task.id}')" class="text-xs px-3 py-1.5 rounded-xl font-semibold border ${
-                            task.completed
-                            ? 'border-slate-200 dark:border-borderDark text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
-                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100'
-                        } transition">
-                            ${task.completed ? 'إرجاع للمتبقي' : 'تم الإنجاز ✓'}
-                        </button>
-                        <button onclick="deleteTask('${task.id}')" title="حذف المهمة"
-                                class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
-                `;
+              <!-- KDS Status Controls -->
+              <div class="pt-2 border-t border-loft-100 dark:border-loft-900 flex gap-2">
+                ${!isPreparing ? `
+                  <button onclick="app.updateOrderStatus('${order.id}', 'preparing')" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition">
+                    <i class="fa-solid fa-play text-[10px]"></i>
+                    <span>بدء التحضير</span>
+                  </button>
+                ` : `
+                  <button onclick="app.updateOrderStatus('${order.id}', 'completed')" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition">
+                    <i class="fa-solid fa-check-double text-[10px]"></i>
+                    <span>تسليم واكتمال</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
 
-                container.appendChild(li);
-            });
+      updateOrderStatus(orderId, newStatus) {
+        const order = this.state.orders.find(o => o.id === orderId);
+        if (!order) return;
+
+        order.status = newStatus;
+        this.persist('orders', this.state.orders);
+
+        if (newStatus === 'completed') soundEffects.playSuccess();
+        else soundEffects.playBeep();
+
+        this.renderKds();
+        this.renderOrdersArchive();
+      },
+
+      renderOrdersArchive() {
+        const tbody = document.getElementById('orders-archive-tbody');
+        if (!tbody) return;
+
+        const filter = document.getElementById('orders-filter-status')?.value || 'all';
+        const filtered = this.state.orders.filter(o => filter === 'all' || o.status === filter);
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" class="p-8 text-center text-slate-400">لا توجد طلبات مسجلة حتى الآن</td>
+            </tr>
+          `;
+          return;
         }
 
-        function updateStats() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const pending = total - completed;
-            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+        tbody.innerHTML = filtered.map(order => `
+          <tr class="hover:bg-loft-50 dark:hover:bg-loft-900/50 transition">
+            <td class="p-3 font-mono font-bold text-loft-900 dark:text-amber-300">#${order.id}</td>
+            <td class="p-3 font-mono text-slate-500">${new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+            <td class="p-3 font-bold">${order.table}</td>
+            <td class="p-3">
+              <span class="truncate max-w-xs block" title="${order.items.map(i => `${i.name} (x${i.qty})`).join(', ')}">
+                ${order.items.map(i => `${i.name} (${i.qty})`).join(', ')}
+              </span>
+            </td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${order.paymentType === 'نقدي' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'}">
+                ${order.paymentType}
+              </span>
+            </td>
+            <td class="p-3 text-rose-500 font-mono">${order.discount > 0 ? `-${order.discount} ₪` : '0 ₪'}</td>
+            <td class="p-3 font-mono font-bold text-caramel dark:text-amber-400">${order.finalAmount} ₪</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${order.status === 'completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : order.status === 'preparing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
+                ${order.status === 'completed' ? 'مسلّم' : order.status === 'preparing' ? 'قيد التحضير' : 'قيد الانتظار'}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              <button onclick='app.printThermalReceipt(${JSON.stringify(order)})' class="p-1.5 rounded-lg bg-loft-100 dark:bg-loft-900 hover:bg-loft-200 text-loft-800 dark:text-amber-300" title="إعادة طباعة الفاتورة">
+                <i class="fa-solid fa-print"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      },
 
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statCompleted').innerText = completed;
-            document.getElementById('statPending').innerText = pending;
-            document.getElementById('statPercentText').innerText = percent + '%';
-            document.getElementById('statProgressBar').style.width = percent + '%';
+      renderMenuTable() {
+        const tbody = document.getElementById('menu-items-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = this.state.products.map(p => `
+          <tr class="hover:bg-loft-50 dark:hover:bg-loft-900/50 transition">
+            <td class="p-3">
+              <img src="${p.img}" alt="${p.name}" class="w-10 h-10 rounded-xl object-cover" onerror="this.src='https://placehold.co/100x100/3d251d/fff?text=Loft'">
+            </td>
+            <td class="p-3 font-bold text-slate-900 dark:text-slate-100">${p.name}</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${p.cat === 'cold' ? 'bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300' : p.cat === 'hot' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}">
+                ${p.cat === 'cold' ? 'مشروبات باردة' : p.cat === 'hot' ? 'مشروبات ساخنة' : 'الحلويات والكيك'}
+              </span>
+            </td>
+            <td class="p-3 font-mono font-bold text-caramel dark:text-amber-400 text-sm">${p.price} ₪</td>
+            <td class="p-3 text-slate-500">${p.ing || '—'}</td>
+            <td class="p-3 text-center space-x-1 space-x-reverse">
+              <button onclick="app.openProductModal('${p.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 hover:bg-blue-100" title="تعديل">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </button>
+              <button onclick="app.deleteProduct('${p.id}')" class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-100" title="حذف">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      },
+
+      openProductModal(id = null) {
+        const modal = document.getElementById('modal-product');
+        const title = document.getElementById('modal-product-title');
+        const form = document.getElementById('form-product');
+        form.reset();
+
+        if (id) {
+          const item = this.state.products.find(p => p.id === id);
+          if (item) {
+            title.textContent = 'تعديل بيانات الصنف والسعر';
+            document.getElementById('prod-form-id').value = item.id;
+            document.getElementById('prod-form-name').value = item.name;
+            document.getElementById('prod-form-cat').value = item.cat;
+            document.getElementById('prod-form-price').value = item.price;
+            document.getElementById('prod-form-img').value = item.img;
+            document.getElementById('prod-form-ingredients').value = item.ing || '';
+          }
+        } else {
+          title.textContent = 'إضافة صنف جديد للقائمة';
+          document.getElementById('prod-form-id').value = '';
         }
 
-        function getCurrentTimeString() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            return `${h}:${m}`;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      saveProduct(e) {
+        e.preventDefault();
+        const id = document.getElementById('prod-form-id').value;
+        const name = document.getElementById('prod-form-name').value.trim();
+        const cat = document.getElementById('prod-form-cat').value;
+        const price = parseFloat(document.getElementById('prod-form-price').value);
+        let img = document.getElementById('prod-form-img').value.trim();
+        const ing = document.getElementById('prod-form-ingredients').value.trim();
+
+        if (!img) {
+          img = cat === 'cold'
+            ? 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=400&q=80'
+            : cat === 'hot'
+            ? 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80'
+            : 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80';
         }
 
-        function startLiveClockAndReminders() {
-            if (clockTimer) clearInterval(clockTimer);
-
-            const checkAndTick = () => {
-                const timeStr = getCurrentTimeString();
-                const clockElem = document.getElementById('activeClock');
-                if (clockElem) {
-                    clockElem.innerText = `الوقت الحالي: ${timeStr}`;
-                }
-
-                // فحص مواعيد بدء وانتهاء المهام للتذكير
-                let updated = false;
-
-                tasks.forEach(task => {
-                    if (!task.completed) {
-                        // تذكير وقت البداية
-                        if (task.startTime === timeStr && !task.notifiedStart) {
-                            showToast(`حان الآن موعد البدء بمهمة: "${task.title}" (${task.course})`, 'تذكير بدء المهمة ⏰', '🎯');
-                            playChime('start');
-                            task.notifiedStart = true;
-                            updated = true;
-                        }
-                        // تذكير وقت النهاية
-                        if (task.endTime === timeStr && !task.notifiedEnd) {
-                            showToast(`شارف الوقت المخصص لمهمة: "${task.title}" على الانتهاء!`, 'تنبيه المهلة ⏳', '⚠️');
-                            playChime('deadline');
-                            task.notifiedEnd = true;
-                            updated = true;
-                        }
-                    }
-                });
-
-                if (updated) {
-                    saveTasks();
-                    renderTaskList();
-                }
-            };
-
-            checkAndTick();
-            clockTimer = setInterval(checkAndTick, 10000); // فحص مستمر كل 10 ثوانٍ
+        if (id) {
+          const index = this.state.products.findIndex(p => p.id === id);
+          if (index !== -1) {
+            this.state.products[index] = { id, name, cat, price, img, ing };
+          }
+          this.notify('تم تحديث بيانات الصنف بنجاح', 'success');
+        } else {
+          const newId = 'prod_' + Date.now();
+          this.state.products.push({ id: newId, name, cat, price, img, ing });
+          this.notify('تمت إضافة الصنف الجديد إلى القائمة', 'success');
         }
 
-        let toastTimeout = null;
-        function showToast(message, title = 'إشعار جامعي', icon = '🔔') {
-            const toast = document.getElementById('toastBox');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
+        this.persist('products', this.state.products);
+        this.closeModal('modal-product');
+        this.renderMenuTable();
+        this.renderPosProducts();
+      },
 
-            toastTitle.innerText = title;
-            toastMessage.innerText = message;
-            toastIcon.innerText = icon;
+      deleteProduct(id) {
+        this.state.products = this.state.products.filter(p => p.id !== id);
+        this.persist('products', this.state.products);
+        this.notify('تم حذف الصنف من القائمة', 'info');
+        this.renderMenuTable();
+        this.renderPosProducts();
+      },
 
-            toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
+      renderInventory() {
+        const tbody = document.getElementById('inventory-tbody');
+        const alertBadge = document.getElementById('low-stock-alert-badge');
+        if (!tbody) return;
 
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
-            }, 4500);
+        let lowCount = 0;
+        let safeCount = 0;
+
+        tbody.innerHTML = this.state.inventory.map(item => {
+          const isLow = item.qty <= item.min;
+          if (isLow) lowCount++;
+          else safeCount++;
+
+          const percent = Math.min(100, Math.round((item.qty / (item.min * 2.5)) * 100));
+
+          return `
+            <tr class="hover:bg-loft-50 dark:hover:bg-loft-900/50 transition">
+              <td class="p-3 font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-box text-loft-500"></i>
+                <span>${item.name}</span>
+              </td>
+              <td class="p-3 font-mono font-bold text-sm ${isLow ? 'text-rose-600 font-black' : ''}">${item.qty}</td>
+              <td class="p-3 text-slate-500">${item.unit}</td>
+              <td class="p-3 font-mono text-slate-500">${item.min} ${item.unit}</td>
+              <td class="p-3">
+                <div class="w-36">
+                  <div class="flex justify-between text-[10px] mb-1 font-bold">
+                    <span class="${isLow ? 'text-rose-600' : 'text-emerald-600'}">${isLow ? 'تنبيه: مخزون منخفض' : 'متوفر بشكل آمن'}</span>
+                    <span>${percent}%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-loft-800 overflow-hidden">
+                    <div class="h-full rounded-full ${isLow ? 'bg-rose-500' : 'bg-emerald-500'}" style="width: ${percent}%;"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="p-3 text-center space-x-1 space-x-reverse">
+                <button onclick="app.openInventoryModal('${item.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 hover:bg-blue-100">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button onclick="app.deleteInventoryItem('${item.id}')" class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-100">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        document.getElementById('inv-total-count').textContent = this.state.inventory.length;
+        document.getElementById('inv-low-count').textContent = lowCount;
+        document.getElementById('inv-safe-count').textContent = safeCount;
+
+        if (lowCount > 0) {
+          alertBadge.classList.remove('hidden');
+        } else {
+          alertBadge.classList.add('hidden');
         }
-    </script>
+      },
+
+      openInventoryModal(id = null) {
+        const modal = document.getElementById('modal-inventory');
+        const title = document.getElementById('modal-inv-title');
+        const form = document.getElementById('form-inventory');
+        form.reset();
+
+        if (id) {
+          const item = this.state.inventory.find(i => i.id === id);
+          if (item) {
+            title.textContent = 'تعديل كمية وبيانات المادة';
+            document.getElementById('inv-form-id').value = item.id;
+            document.getElementById('inv-form-name').value = item.name;
+            document.getElementById('inv-form-qty').value = item.qty;
+            document.getElementById('inv-form-unit').value = item.unit;
+            document.getElementById('inv-form-min').value = item.min;
+          }
+        } else {
+          title.textContent = 'إضافة مادة خام جديدة للمخزن';
+          document.getElementById('inv-form-id').value = '';
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      saveInventoryItem(e) {
+        e.preventDefault();
+        const id = document.getElementById('inv-form-id').value;
+        const name = document.getElementById('inv-form-name').value.trim();
+        const qty = parseFloat(document.getElementById('inv-form-qty').value);
+        const unit = document.getElementById('inv-form-unit').value.trim();
+        const min = parseFloat(document.getElementById('inv-form-min').value);
+
+        if (id) {
+          const index = this.state.inventory.findIndex(i => i.id === id);
+          if (index !== -1) {
+            this.state.inventory[index] = { id, name, qty, unit, min };
+          }
+          this.notify('تم تحديث المخزون', 'success');
+        } else {
+          const newId = 'inv_' + Date.now();
+          this.state.inventory.push({ id: newId, name, qty, unit, min });
+          this.notify('تم تسجيل المادة الجديدة في المخزن', 'success');
+        }
+
+        this.persist('inventory', this.state.inventory);
+        this.closeModal('modal-inventory');
+        this.renderInventory();
+      },
+
+      deleteInventoryItem(id) {
+        this.state.inventory = this.state.inventory.filter(i => i.id !== id);
+        this.persist('inventory', this.state.inventory);
+        this.notify('تم حذف المادة من سجل المخزون', 'info');
+        this.renderInventory();
+      },
+
+      renderTasks() {
+        const container = document.getElementById('tasks-list-container');
+        if (!container) return;
+
+        if (this.state.tasks.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">لا توجد مهام مسجلة حالياً</p>`;
+          return;
+        }
+
+        container.innerHTML = this.state.tasks.map(task => {
+          const isDone = task.status === 'done';
+          const isInProgress = task.status === 'in_progress';
+
+          return `
+            <div class="bg-white dark:bg-loft-950 p-3.5 rounded-2xl border ${isDone ? 'border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/20' : 'border-loft-200 dark:border-loft-900'} shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full ${isDone ? 'bg-emerald-500' : isInProgress ? 'bg-blue-500' : 'bg-amber-500'}"></span>
+                  <h4 class="font-bold text-xs ${isDone ? 'line-through text-slate-400' : 'text-slate-900 dark:text-slate-100'}">${task.title}</h4>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 text-[10px] text-slate-500 font-mono">
+                  <span><i class="fa-solid fa-user-tag text-loft-500"></i> ${task.assignee}</span>
+                  <span><i class="fa-regular fa-calendar-plus text-emerald-500"></i> بداية: ${task.start.replace('T', ' ')}</span>
+                  <span><i class="fa-regular fa-calendar-check text-rose-500"></i> نهاية: ${task.end.replace('T', ' ')}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 self-end sm:self-center">
+                <select onchange="app.updateTaskStatus('${task.id}', this.value)" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-loft-100 dark:bg-loft-900 border border-loft-200 dark:border-loft-800">
+                  <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>قيد الانتظار</option>
+                  <option value="in_progress" ${task.status === 'in_progress' ? 'selected' : ''}>جاري التنفيذ</option>
+                  <option value="done" ${task.status === 'done' ? 'selected' : ''}>مكتملة</option>
+                </select>
+                <button onclick="app.deleteTask('${task.id}')" class="p-1 text-rose-500 hover:text-rose-700">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      openTaskModal() {
+        const modal = document.getElementById('modal-task');
+        document.getElementById('form-task').reset();
+        
+        // Auto-fill sensible dates
+        const now = new Date();
+        const startIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const endIso = new Date(now.getTime() + 60 * 60 * 1000 - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        
+        document.getElementById('task-form-start').value = startIso;
+        document.getElementById('task-form-end').value = endIso;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      saveTask(e) {
+        e.preventDefault();
+        const title = document.getElementById('task-form-title').value.trim();
+        const assignee = document.getElementById('task-form-assignee').value.trim();
+        const start = document.getElementById('task-form-start').value;
+        const end = document.getElementById('task-form-end').value;
+
+        const newTask = {
+          id: 'tsk_' + Date.now(),
+          title,
+          assignee,
+          start,
+          end,
+          status: 'pending'
+        };
+
+        this.state.tasks.unshift(newTask);
+        this.persist('tasks', this.state.tasks);
+        this.notify('تمت جدولة المهمة بنجاح', 'success');
+        this.closeModal('modal-task');
+        this.renderTasks();
+      },
+
+      updateTaskStatus(id, newStatus) {
+        const task = this.state.tasks.find(t => t.id === id);
+        if (!task) return;
+
+        task.status = newStatus;
+        this.persist('tasks', this.state.tasks);
+        if (newStatus === 'done') soundEffects.playSuccess();
+        this.renderTasks();
+      },
+
+      deleteTask(id) {
+        this.state.tasks = this.state.tasks.filter(t => t.id !== id);
+        this.persist('tasks', this.state.tasks);
+        this.notify('تم حذف المهمة', 'info');
+        this.renderTasks();
+      },
+
+      renderShifts() {
+        const container = document.getElementById('shifts-log-container');
+        if (!container) return;
+
+        if (this.state.shifts.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">لا توجد سجلات حضور مسجلة اليوم</p>`;
+          return;
+        }
+
+        container.innerHTML = this.state.shifts.map(shift => `
+          <div class="p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900 flex items-center justify-between border border-loft-100 dark:border-loft-800 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg ${shift.action === 'in' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400'} flex items-center justify-center font-bold">
+                <i class="fa-solid ${shift.action === 'in' ? 'fa-arrow-right-to-bracket' : 'fa-arrow-right-from-bracket'}"></i>
+              </span>
+              <div>
+                <p class="font-bold text-slate-800 dark:text-slate-100">${shift.name}</p>
+                <span class="text-[10px] text-slate-400">${shift.action === 'in' ? 'تسجيل حضور نوبة' : 'تسجيل انصراف'} • ${shift.time}</span>
+              </div>
+            </div>
+            <div class="text-amber-400 text-[11px]">
+              ${'★'.repeat(shift.rating || 5)}
+            </div>
+          </div>
+        `).join('');
+      },
+
+      openShiftAttendanceModal() {
+        const modal = document.getElementById('modal-shift');
+        document.getElementById('form-shift').reset();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      saveShiftRecord(e) {
+        e.preventDefault();
+        const name = document.getElementById('shift-emp-name').value.trim();
+        const action = document.getElementById('shift-action-type').value;
+        const rating = parseInt(document.getElementById('shift-emp-rating').value, 10);
+
+        const newShift = {
+          id: 'sh_' + Date.now(),
+          name,
+          action,
+          rating,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        this.state.shifts.unshift(newShift);
+        this.persist('shifts', this.state.shifts);
+        this.notify(`تم تسجيل ${action === 'in' ? 'حضور' : 'انصراف'} ${name} بنجاح`, 'success');
+        this.closeModal('modal-shift');
+        this.renderShifts();
+      },
+
+      renderPromos() {
+        const container = document.getElementById('promos-cards-container');
+        if (!container) return;
+
+        container.innerHTML = this.state.promos.map(promo => `
+          <div class="bg-white dark:bg-loft-950 p-4 rounded-2xl border border-loft-200 dark:border-loft-900 shadow-sm relative overflow-hidden flex flex-col justify-between space-y-3">
+            <div class="absolute -left-6 -top-6 w-16 h-16 bg-caramel/10 dark:bg-amber-400/10 rounded-full"></div>
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-black text-sm text-caramel dark:text-amber-400 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800">${promo.code}</span>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 font-mono">
+                  ${promo.type === 'percent' ? promo.val + '%' : promo.val + ' ₪'} خصم
+                </span>
+              </div>
+              
+              <div class="mt-3 p-2.5 rounded-xl bg-loft-50 dark:bg-loft-900 text-xs text-slate-600 dark:text-slate-300">
+                <span class="font-bold text-slate-800 dark:text-amber-200 block text-[11px] mb-0.5"><i class="fa-solid fa-circle-info text-caramel ml-1"></i> الحالة وشروط المنح:</span>
+                <p class="text-[11px] leading-relaxed">${promo.condition}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-loft-100 dark:border-loft-900 pt-2 text-xs">
+              <button onclick="app.applyPromoDirectly('${promo.code}')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                <i class="fa-solid fa-check"></i> تجربة في السلة
+              </button>
+              <button onclick="app.deletePromo('${promo.id}')" class="text-rose-500 hover:text-rose-700 p-1">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      openPromoModal() {
+        const modal = document.getElementById('modal-promo');
+        document.getElementById('form-promo').reset();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      savePromoCode(e) {
+        e.preventDefault();
+        const code = document.getElementById('promo-form-code').value.trim().toUpperCase();
+        const type = document.getElementById('promo-form-type').value;
+        const val = parseFloat(document.getElementById('promo-form-val').value);
+        const condition = document.getElementById('promo-form-condition').value.trim();
+
+        const newPromo = {
+          id: 'p_' + Date.now(),
+          code,
+          type,
+          val,
+          condition
+        };
+
+        this.state.promos.unshift(newPromo);
+        this.persist('promos', this.state.promos);
+        this.notify('تمت إضافة كود الخصم الجديد مع توضيح الحالة', 'success');
+        this.closeModal('modal-promo');
+        this.renderPromos();
+      },
+
+      applyPromoDirectly(code) {
+        this.switchTab('pos');
+        document.getElementById('pos-promo-input').value = code;
+        this.applyPromoCode();
+      },
+
+      deletePromo(id) {
+        this.state.promos = this.state.promos.filter(p => p.id !== id);
+        this.persist('promos', this.state.promos);
+        this.notify('تم حذف كود الخصم', 'info');
+        this.renderPromos();
+      },
+
+      renderCashflow() {
+        const tbody = document.getElementById('cashflow-tbody');
+        const headerBalance = document.getElementById('header-balance-amount');
+        if (!tbody) return;
+
+        let totalIn = 0;
+        let totalOut = 0;
+
+        this.state.cashflow.forEach(entry => {
+          if (entry.type === 'in') totalIn += entry.amount;
+          else totalOut += entry.amount;
+        });
+
+        const net = totalIn - totalOut;
+
+        document.getElementById('cashflow-total-in').textContent = totalIn.toFixed(2) + ' ₪';
+        document.getElementById('cashflow-total-out').textContent = totalOut.toFixed(2) + ' ₪';
+        document.getElementById('cashflow-net-balance').textContent = net.toFixed(2) + ' ₪';
+        if (headerBalance) headerBalance.textContent = net.toFixed(2) + ' ₪';
+
+        tbody.innerHTML = this.state.cashflow.map(entry => `
+          <tr class="hover:bg-loft-50 dark:hover:bg-loft-900/50 transition">
+            <td class="p-3 font-mono text-slate-500">${new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${entry.type === 'in' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}">
+                ${entry.type === 'in' ? 'وارد (+)' : 'صادر (-)'}
+              </span>
+            </td>
+            <td class="p-3 font-bold">${entry.reason}</td>
+            <td class="p-3 text-slate-400">${entry.category}</td>
+            <td class="p-3 font-mono font-bold ${entry.type === 'in' ? 'text-emerald-600' : 'text-rose-600'}">
+              ${entry.type === 'in' ? '+' : '-'}${entry.amount.toFixed(2)} ₪
+            </td>
+            <td class="p-3 text-center">
+              <button onclick="app.deleteCashflowEntry('${entry.id}')" class="text-rose-500 hover:text-rose-700 p-1">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      },
+
+      openCashflowModal(type = 'in') {
+        const modal = document.getElementById('modal-cashflow');
+        const title = document.getElementById('modal-cashflow-title');
+        document.getElementById('form-cashflow').reset();
+        document.getElementById('cashflow-form-type').value = type;
+
+        title.textContent = type === 'in' ? 'تسجيل مبلغ وارد (إيراد نقدي)' : 'تسجيل مبلغ صادر (مصروف تشغيلي)';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      },
+
+      saveCashflowEntry(e) {
+        e.preventDefault();
+        const type = document.getElementById('cashflow-form-type').value;
+        const amount = parseFloat(document.getElementById('cashflow-form-amount').value);
+        const reason = document.getElementById('cashflow-form-reason').value.trim();
+        const category = document.getElementById('cashflow-form-category').value;
+
+        const newEntry = {
+          id: 'cf_' + Date.now(),
+          type,
+          amount,
+          reason,
+          category,
+          time: new Date().toISOString()
+        };
+
+        this.state.cashflow.unshift(newEntry);
+        this.persist('cashflow', this.state.cashflow);
+        this.notify('تم تسجيل الحركة المالية بنجاح', 'success');
+        this.closeModal('modal-cashflow');
+        this.renderCashflow();
+      },
+
+      deleteCashflowEntry(id) {
+        this.state.cashflow = this.state.cashflow.filter(c => c.id !== id);
+        this.persist('cashflow', this.state.cashflow);
+        this.notify('تم حذف القيد المالي', 'info');
+        this.renderCashflow();
+      },
+
+      openVisitorModal() {
+        const modal = document.getElementById('modal-visitor');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('modal-visitor-number').textContent = this.state.visitors24h;
+      },
+
+      incrementVisitors(amount = 1, silent = false) {
+        this.state.visitors24h += amount;
+        this.persist('visitors', this.state.visitors24h);
+        this.updateVisitorCounterUI();
+        if (!silent) {
+          soundEffects.playBeep();
+          this.notify(`تم تسجيل ${amount} زبون بنجاح`, 'success');
+        }
+      },
+
+      resetVisitors() {
+        this.state.visitors24h = 0;
+        this.persist('visitors', 0);
+        this.updateVisitorCounterUI();
+        this.notify('تم تصفير عداد الزوار لليوم الجديد', 'info');
+      },
+
+      updateVisitorCounterUI() {
+        const count = this.state.visitors24h;
+        const badge = document.getElementById('badge-visitor-count');
+        const modalNum = document.getElementById('modal-visitor-number');
+        if (badge) badge.textContent = count;
+        if (modalNum) modalNum.textContent = count;
+      },
+
+      openFeedbackModal() {
+        const modal = document.getElementById('modal-feedback');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        this.renderFeedback();
+      },
+
+      setFeedbackRating(val) {
+        this.state.currentRatingTemp = val;
+        const stars = document.querySelectorAll('#feedback-stars i');
+        stars.forEach((s, idx) => {
+          if (idx < val) s.className = "fa-solid fa-star cursor-pointer";
+          else s.className = "fa-regular fa-star cursor-pointer";
+        });
+      },
+
+      saveFeedback(e) {
+        e.preventDefault();
+        const name = document.getElementById('feedback-name').value.trim() || 'زبون زائر';
+        const type = document.getElementById('feedback-type').value;
+        const message = document.getElementById('feedback-message').value.trim();
+        const rating = this.state.currentRatingTemp;
+
+        const newFb = {
+          id: 'fb_' + Date.now(),
+          name,
+          type,
+          message,
+          rating,
+          time: new Date().toISOString()
+        };
+
+        this.state.feedback.unshift(newFb);
+        this.persist('feedback', this.state.feedback);
+        soundEffects.playSuccess();
+        this.notify('شكراً لك! تم استلام الرأي وتوثيقه بنجاح', 'success');
+        document.getElementById('form-feedback').reset();
+        this.renderFeedback();
+      },
+
+      renderFeedback() {
+        const container = document.getElementById('feedback-list-container');
+        if (!container) return;
+
+        if (this.state.feedback.length === 0) {
+          container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">لا توجد ملاحظات مسجلة حتى الآن</p>`;
+          return;
+        }
+
+        container.innerHTML = this.state.feedback.map(fb => `
+          <div class="p-3 rounded-xl bg-white dark:bg-loft-950 border border-loft-100 dark:border-loft-900 text-xs space-y-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-slate-900 dark:text-slate-100">${fb.name}</span>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${fb.type === 'complaint' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' : fb.type === 'praise' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'}">
+                  ${fb.type === 'complaint' ? 'شكوى' : fb.type === 'praise' ? 'ثناء' : 'اقتراح'}
+                </span>
+              </div>
+              <div class="text-amber-400 text-[10px]">
+                ${'★'.repeat(fb.rating || 5)}
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">${fb.message}</p>
+            <span class="text-[9px] text-slate-400 font-mono block">${new Date(fb.time).toLocaleDateString()}</span>
+          </div>
+        `).join('');
+      },
+
+      closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
+      },
+
+      notify(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        const color = type === 'success' ? 'bg-emerald-600 text-white' :
+                      type === 'error' ? 'bg-rose-600 text-white' :
+                      type === 'warning' ? 'bg-amber-600 text-white' : 'bg-loft-800 text-white';
+
+        toast.className = `${color} px-4 py-2.5 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300`;
+        toast.innerHTML = `
+          <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-xmark' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info'}"></i>
+          <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      }
+    };
+
+    // Initialize application on DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
 </body>
 </html>
