@@ -1,737 +1,1042 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loft Up - نظام إدارة الكوفي الشوب</title>
-    <!-- خطوط عربية عصرية -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>مدير المهام الجامعية الذكي | UniTask Pro</title>
+    
+    <!-- خط القاهرة والخط الكوفي الحديث من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Alexandria:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Canvas Confetti للاحتفال بالإنجاز -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                        display: ['Alexandria', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        emeraldCustom: '#10b981',
+                        surfaceDark: '#0f172a',
+                        cardDark: '#1e293b',
+                        borderDark: '#334155',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --bg-color: #F4F0EB;
-            --card-bg: #FFFFFF;
-            --text-color: #2C1A14;
-            --primary-color: #3A5A40;
-            --accent-color: #C97A3E;
-            --border-color: #E2DBD4;
-            --sidebar-bg: #2C1A14;
-            --sidebar-text: #FFFFFF;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --card-bg: #1E1E1E;
-            --text-color: #E0E0E0;
-            --primary-color: #4E7C56;
-            --accent-color: #D98B48;
-            --border-color: #333333;
-            --sidebar-bg: #1A0F0B;
-            --sidebar-text: #E0E0E0;
-        }
-
+        /* أنماط وتأثيرات بصرية حركية */
         * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
             font-family: 'Cairo', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            min-height: 100vh;
+        .heading-font {
+            font-family: 'Alexandria', 'Cairo', sans-serif;
         }
 
-        /* Sidebar */
-        aside {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
         }
-
-        .brand-container {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 15px;
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
-
-        .brand-logo {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent-color);
-            margin-bottom: 8px;
-        }
-
-        .brand-name {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--accent-color);
-            letter-spacing: 1px;
-        }
-
-        aside button {
-            background: none;
-            border: none;
-            color: var(--sidebar-text);
-            padding: 10px 15px;
-            text-align: right;
-            font-size: 13px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        aside button:hover, aside button.active {
-            background-color: var(--primary-color);
-        }
-
-        /* Main Content */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            max-height: 100vh;
-        }
-
-        header {
-            background-color: var(--card-bg);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-title-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid var(--accent-color);
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-        }
-
-        .controls button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .content-body {
-            padding: 30px;
-            flex: 1;
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        h2.section-title {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: var(--accent-color);
-        }
-
-        /* Tables & Cards */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-action {
-            padding: 5px 10px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 5px;
-        }
-
-        .btn-edit { background-color: #3498db; color: white; }
-        .btn-delete { background-color: #e74c3c; color: white; }
-        .btn-add { background-color: var(--accent-color); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px;}
-
-        /* Categories tabs */
-        .category-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .cat-btn {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-        .cat-btn.active {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
-
-        /* Product Cards with Images */
-        .product-card {
-            background: var(--card-bg);
-            padding: 15px;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
             border-radius: 10px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
-        .product-img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-            border: 2px solid var(--accent-color);
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
         }
 
-        /* Responsive Layout */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
+        /* حركات التلاشي والظهور المنساب */
+        @keyframes slideDownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-16px) scale(0.98);
             }
-            aside {
-                width: 100%;
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 10px;
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
             }
-            .brand-container { display: none; }
-            aside button { font-size: 12px; padding: 8px; margin-bottom: 0; }
-            main { max-height: none; }
+        }
+
+        .animate-enter {
+            animation: slideDownFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* حركات التلميح العائم الانسيابية والديناميكية */
+        @keyframes floatingEnter {
+            0% {
+                opacity: 0;
+                transform: translateY(45px) scale(0.92);
+            }
+            65% {
+                opacity: 1;
+                transform: translateY(-5px) scale(1.01);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes floatingExit {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(35px) scale(0.92);
+            }
+        }
+
+        /* طفو بطيء وخفيف يمنح لمسة حيوية للتلميح */
+        @keyframes softBobbing {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .floating-hint-enter {
+            animation: floatingEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .floating-hint-exit {
+            animation: floatingExit 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .floating-bobbing {
+            animation: softBobbing 5s ease-in-out infinite;
+        }
+
+        /* نبض ناعم للتنبيه الحالي */
+        @keyframes subtlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        .pulse-active {
+            animation: subtlePulse 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body>
 
-    <!-- القائمة الجانبية مع شعار واسم Loft Up -->
-    <aside>
-        <div class="brand-container">
-            <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=150" alt="Loft Up Logo" class="brand-logo">
-            <div class="brand-name">Loft Up</div>
-        </div>
-        <button class="active" onclick="switchSection('dashboard', this)">📊 لوحة التحكم</button>
-        <button onclick="switchSection('pos', this)">🛒 نقطة البيع (POS)</button>
-        <button onclick="switchSection('menu-mgmt', this)">⚙️ إدارة الخدمات والأسعار</button>
-        <button onclick="switchSection('finance', this)">💵 المبالغ الواردة والصادرة</button>
-        <button onclick="switchSection('tasks', this)">📋 إدارة المهام</button>
-        <button onclick="switchSection('inventory', this)">📦 إدارة المخزون</button>
-        <button onclick="switchSection('feedback', this)">💬 آراء وشكاوى الزبائن</button>
-        <button onclick="switchSection('visitors', this)">👥 عداد الزبائن (24 ساعة)</button>
-    </aside>
+<body class="bg-slate-100 text-slate-800 dark:bg-surfaceDark dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col justify-between">
 
-    <!-- المحتوى الرئيسي -->
-    <main>
-        <header>
-            <div class="header-title-box">
-                <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=150" alt="Loft Up" class="header-logo">
-                <h1 id="page-title" style="font-size: 20px;">Loft Up - لوحة التحكم الإدارية</h1>
-            </div>
-            <div class="controls">
-                <button onclick="toggleTheme()">🌓 الوضع المظلم/الفاتح</button>
-                <button onclick="toggleLang()">🌐 English / عربي</button>
+    <!-- الحاوية الرئيسية للتطبيق -->
+    <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 flex-1">
+        
+        <!-- الشريط العلوي الترويسي الأكاديمي المطور -->
+        <header class="bg-white/80 dark:bg-cardDark/80 backdrop-blur-md border border-slate-200/80 dark:border-borderDark rounded-3xl p-5 sm:p-6 mb-8 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <!-- هوية المنصة الجامعية -->
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-blue-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-brand-500/25 shrink-0 ring-4 ring-brand-50 dark:ring-brand-950/50">
+                        🎓
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <h1 class="heading-font text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                منصة إنجاز الجامعية
+                            </h1>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                المنظّم الذكي
+                            </span>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                الفصل الأكاديمي النشط
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                            نظام متكامل لجدولة المحاضرات، إدارة الواجبات، ومتابعة التحصيل الدراسي بتفوق
+                        </p>
+                    </div>
+                </div>
+
+                <!-- الأدوات وعناصر التحكم بالتاريخ والمظهر -->
+                <div class="flex flex-wrap items-center justify-between lg:justify-end gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-borderDark">
+                    <!-- كبسولة التاريخ الحالي -->
+                    <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-borderDark text-xs font-semibold text-slate-600 dark:text-slate-300">
+                        <span>🗓️</span>
+                        <span id="currentDateDisplay">جاري التحميل...</span>
+                    </div>
+
+                    <!-- زر تفعيل/كتم الصوت التنبيهي -->
+                    <button id="soundToggleBtn" onclick="toggleAudio()" title="تبديل صوت التنبيهات" 
+                            class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-borderDark text-slate-700 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-200 transition-all flex items-center gap-2 text-xs font-semibold shadow-xs">
+                        <span id="soundIcon">🔔</span>
+                        <span id="soundText">الصوت مُفعل</span>
+                    </button>
+
+                    <!-- زر تبديل الوضع (النهاري الافتراضي / الليلي) -->
+                    <button id="themeToggleBtn" onclick="toggleTheme()" title="تبديل بين الوضع النهاري والليلي"
+                            class="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-borderDark text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 transition-all flex items-center gap-2 text-xs font-semibold shadow-xs">
+                        <span id="themeIcon">🌙</span>
+                        <span id="themeText">الوضع الليلي</span>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <div class="content-body">
-            
-            <!-- 1. لوحة التحكم -->
-            <section id="dashboard" class="section active">
-                <h2 class="section-title">تقارير المبيعات وأداء الموظفين</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                        <h3>إجمالي المبيعات اليومية</h3>
-                        <p style="font-size: 24px; font-weight: bold; color: var(--accent-color); margin-top: 10px;">1,450 شيقل</p>
-                    </div>
-                    <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                        <h3>الطلبات المكتملة</h3>
-                        <p style="font-size: 24px; font-weight: bold; color: var(--primary-color); margin-top: 10px;">84 طلب</p>
-                    </div>
+        <!-- مؤشرات الإنجاز الأكاديمي السريع -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
+                <div class="text-slate-500 dark:text-slate-400 text-xs font-semibold mb-1">إجمالي المهام</div>
+                <div id="statTotal" class="heading-font text-2xl font-bold text-slate-800 dark:text-slate-100">0</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
+                <div class="text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-1">المهام المنجزة</div>
+                <div id="statCompleted" class="heading-font text-2xl font-bold text-emerald-600 dark:text-emerald-400">0</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm">
+                <div class="text-amber-600 dark:text-amber-400 text-xs font-semibold mb-1">قيد الانتظار / التنفيذ</div>
+                <div id="statPending" class="heading-font text-2xl font-bold text-amber-600 dark:text-amber-400">0</div>
+            </div>
+            <div class="bg-white dark:bg-cardDark p-4 rounded-2xl border border-slate-200 dark:border-borderDark shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                    <span>نسبة الإنجاز</span>
+                    <span id="statPercentText" class="font-bold text-brand-600 dark:text-brand-400">0%</span>
                 </div>
-            </section>
-
-            <!-- 2. نقطة البيع POS -->
-            <section id="pos" class="section">
-                <h2 class="section-title">نظام نقاط البيع (POS) وإدارة الطلبات</h2>
-                
-                <div style="margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 8px; display: inline-block;">
-                    <label for="table-number" style="font-weight: 600; margin-left: 10px;">رقم الطاولة:</label>
-                    <input type="number" id="table-number" value="1" min="1" style="padding: 6px; width: 80px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-color); color: var(--text-color);">
+                <div class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-full h-2.5 overflow-hidden">
+                    <div id="statProgressBar" class="bg-brand-600 dark:bg-brand-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
-
-                <div class="category-tabs">
-                    <button class="cat-btn active" onclick="filterCategory('all', this)">الكل</button>
-                    <button class="cat-btn" onclick="filterCategory('hot', this)">☕ مشروبات ساخنة</button>
-                    <button class="cat-btn" onclick="filterCategory('cold', this)">🥤 مشروبات باردة</button>
-                    <button class="cat-btn" onclick="filterCategory('dessert', this)">🍰 الحلويات والكيك</button>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;" id="products-grid">
-                    <!-- تعبئة المنتجات ديناميكياً -->
-                </div>
-            </section>
-
-            <!-- 3. إدارة الخدمات والأسعار -->
-            <section id="menu-mgmt" class="section">
-                <h2 class="section-title">إدارة وتعديل قائمة الخدمات والأسعار</h2>
-                <button class="btn-add" onclick="openAddProductModal()">+ إضافة منتج/خدمة جديدة</button>
-                <table id="menu-table">
-                    <thead>
-                        <tr>
-                            <th>الصورة</th>
-                            <th>اسم المنتج/الخدمة</th>
-                            <th>التصنيف</th>
-                            <th>السعر (شيقل)</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
-
-            <!-- 4. المبالغ الواردة والصادرة -->
-            <section id="finance" class="section">
-                <h2 class="section-title">إدارة المبالغ الواردة والصادرة (الصندوق)</h2>
-                <button class="btn-add" onclick="openFinanceModal()">+ تسجيل حركة مالية جديدة</button>
-                <table id="finance-table">
-                    <thead>
-                        <tr>
-                            <th>البيان / الوصف</th>
-                            <th>النوع</th>
-                            <th>المبلغ (شيقل)</th>
-                            <th>التاريخ</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>مبيعات الفترة الصباحية</td>
-                            <td><span style="color: #27ae60; font-weight: bold;">وارد 📥</span></td>
-                            <td>850 شيقل</td>
-                            <td>2026-06-01</td>
-                            <td>
-                                <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>شراء مواد خام (حليب وبن)</td>
-                            <td><span style="color: #e74c3c; font-weight: bold;">صادر 📤</span></td>
-                            <td>300 شيقل</td>
-                            <td>2026-06-01</td>
-                            <td>
-                                <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- 5. إدارة المهام -->
-            <section id="tasks" class="section">
-                <h2 class="section-title">إدارة المهام اليومية والتشغيلية</h2>
-                <button class="btn-add" onclick="openTaskModal()">+ إضافة مهمة جديدة</button>
-                
-                <table id="tasks-table">
-                    <thead>
-                        <tr>
-                            <th>اسم المهمة</th>
-                            <th>الموظف المسؤول</th>
-                            <th>تاريخ البداية</th>
-                            <th>تاريخ النهاية</th>
-                            <th>الحالة</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>جرد صندوق الكاشير</td>
-                            <td>أحمد (كاشير)</td>
-                            <td>2026-06-01 08:00</td>
-                            <td>2026-06-01 08:30</td>
-                            <td>قيد التنفيذ</td>
-                            <td>
-                                <button class="btn-action btn-edit" onclick="editTask(this)">تعديل</button>
-                                <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- 6. المخزون -->
-            <section id="inventory" class="section">
-                <h2 class="section-title">إدارة المخزون والمواد الخام</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>المادة الخام</th>
-                            <th>الكمية الحالية</th>
-                            <th>الحد الأدنى للتنبيه</th>
-                            <th>الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>حبوب قهوة إيثيوبية</td>
-                            <td>4.5 كغ</td>
-                            <td>5 كغ</td>
-                            <td><span style="color: #e74c3c; font-weight: bold;">منخفض (تنبيه ⚠️)</span></td>
-                        </tr>
-                        <tr>
-                            <td>حليب طازج</td>
-                            <td>25 لتر</td>
-                            <td>15 لتر</td>
-                            <td><span style="color: var(--primary-color); font-weight: bold;">متوفر</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- 7. آراء وشكاوى الزبائن -->
-            <section id="feedback" class="section">
-                <h2 class="section-title">استقبال آراء وشكاوى الزبائن</h2>
-                <button class="btn-add" onclick="openFeedbackModal()">+ تسجيل رأي أو شكوى جديدة</button>
-                <table id="feedback-table">
-                    <thead>
-                        <tr>
-                            <th>اسم الزبون</th>
-                            <th>رقم الطاولة</th>
-                            <th>النوع</th>
-                            <th>التعليق/الشكوى</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>محمد علي</td>
-                            <td>4</td>
-                            <td>رأي إيجابي</td>
-                            <td>القهوة ممتازة والخدمة سريعة جداً.</td>
-                            <td>
-                                <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- 8. عداد الزبائن (24 ساعة) -->
-            <section id="visitors" class="section">
-                <h2 class="section-title">عدد الزبائن خلال آخر 24 ساعة</h2>
-                <div style="background: var(--card-bg); padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 400px; margin: 0 auto;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary-color);">إجمالي الزبائن المسجلين اليوم</h3>
-                    <p id="visitor-count-display" style="font-size: 48px; font-weight: bold; color: var(--accent-color); margin-bottom: 20px;">128</p>
-                    <button class="btn-add" onclick="incrementVisitor()">+ تسجيل دخول زبون جديد</button>
-                </div>
-            </section>
-
+            </div>
         </div>
-    </main>
 
-    <!-- JavaScript التفاعلي -->
+        <!-- قسم إضافة مهمة جديدة مع الجدول الزمني -->
+        <section class="bg-white dark:bg-cardDark rounded-3xl border border-slate-200 dark:border-borderDark p-5 sm:p-6 shadow-sm mb-8">
+            <h2 class="heading-font text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-500 inline-block"></span>
+                <span>إدراج مهمة دراسية جديدة</span>
+            </h2>
+
+            <form id="taskForm" onsubmit="handleAddTask(event)" class="space-y-4">
+                <!-- عنوان المهمة والتصنيف الدراسي -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">عنوان المهمة أو الواجب الدراسي</label>
+                        <input type="text" id="taskTitle" required placeholder="مثال: حل مسائل تفاضل وتكامل 2 / مراجعة شبكات الحاسوب"
+                               class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">المادة / المجال</label>
+                        <input type="text" id="taskCourse" placeholder="مثال: ذكاء اصطناعي، فيزياء..." 
+                               class="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
+                    </div>
+                </div>
+
+                <!-- الأوقات والأولوية -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                            <span>وقت البداية</span>
+                            <span class="text-[11px] text-brand-600 dark:text-brand-400 font-normal">⏰ موعد التذكير</span>
+                        </label>
+                        <input type="time" id="taskStartTime" required
+                               class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                            <span>وقت النهاية</span>
+                            <span class="text-[11px] text-red-500 font-normal">⏳ مهلة الإنجاز</span>
+                        </label>
+                        <input type="time" id="taskEndTime" required
+                               class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5">درجة الأهمية / الأولوية</label>
+                        <select id="taskPriority" 
+                                class="w-full px-3 py-2.5 rounded-xl text-sm border border-slate-200 dark:border-borderDark bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition cursor-pointer">
+                            <option value="high">🔴 أولوية قصوى (عاجل وهام)</option>
+                            <option value="medium" selected>🟡 أولوية متوسطة (اعتيادي)</option>
+                            <option value="low">🟢 أولوية مرنة (مراجعة وقراءة)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- زر الحفظ والإضافة -->
+                <div class="pt-2 flex justify-end">
+                    <button type="submit" 
+                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-98 text-white font-bold text-sm shadow-md shadow-brand-500/20 hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <span>➕</span>
+                        <span>إدراج في جدول اليوم</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- قسم تصفية وعرض المهام المجدولة -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <h2 class="heading-font text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <span>📋</span>
+                        <span>الجدول الزمني لمهام اليوم</span>
+                    </h2>
+                    <span id="activeClock" class="text-xs px-2.5 py-1 bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg font-mono">--:--</span>
+                </div>
+
+                <!-- أزرار التصفية السريعة -->
+                <div class="flex items-center bg-slate-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+                    <button onclick="setFilter('all')" id="filterAll" class="px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark text-slate-800 dark:text-white shadow-xs transition">الكل</button>
+                    <button onclick="setFilter('pending')" id="filterPending" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">المتبقية</button>
+                    <button onclick="setFilter('completed')" id="filterCompleted" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">المنجزة</button>
+                </div>
+            </div>
+
+            <!-- الحالة الفارغة في حال عدم وجود مهام -->
+            <div id="emptyState" class="hidden py-14 px-4 text-center rounded-3xl bg-white dark:bg-cardDark border border-dashed border-slate-200 dark:border-borderDark">
+                <div class="text-5xl mb-3">🎓✨</div>
+                <h3 class="font-bold text-slate-700 dark:text-slate-200 text-base mb-1">جدولك خالٍ حالياً!</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    قم بإضافة أول واجب، محاضرة، أو جلسة دراسية للاستفادة من التذكيرات الذكية والمتابعة الدقيقة.
+                </p>
+            </div>
+
+            <!-- قائمة المهام الديناميكية -->
+            <ul id="tasksContainer" class="space-y-3">
+                <!-- يتم ملء المهام بواسطة الجافاسكربت -->
+            </ul>
+        </section>
+    </div>
+
+    <!-- التذييل الأكاديمي الشامل والأنيق (Footer) -->
+    <footer class="mt-14 bg-white dark:bg-cardDark border-t border-slate-200 dark:border-borderDark transition-colors duration-300">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-slate-100 dark:border-borderDark">
+                
+                <!-- العمود الأول: التعريف والغرض -->
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 text-sm">
+                        <span>🎓</span>
+                        <span>منظومة النجاح الجامعي</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        أداة مبنية وفق أحدث استراتيجيات إدارة الوقت (مصفوفة آيزنهاور، تقنية بومودورو) لمساعدة الطلاب على التخلص من التسويف وضمان التفوق الفصلي.
+                    </p>
+                </div>
+
+                <!-- العمود الثاني: ركائز الدراسة الفعالة -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        قواعد ذهبية للتحصيل
+                    </h4>
+                    <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
+                        <li class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                            <span>ابدأ دائماً بالمهمة الأكثر وزناً وأهمية.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>قسّم المشاريع الكبيرة لمهام صغيرة محددة بوقت.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span>الراحة المنتظمة تضاعف سعة الاستيعاب والتركيز.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- العمود الثالث: مؤشر الخصوصية والأمان -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        حفظ البيانات والخصوصية
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        جميع جداولك وملاحظاتك الدراسية تُحفظ مباشرة وبشكل آمن في متصفحك الشخصي دون الحاجة لحساب أو اتصال خارجي.
+                    </p>
+                    <div class="pt-1 flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        <span>🔒</span>
+                        <span>الوضع المحلي الآمن نشط</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- السطر السفلي لحقوق الامتياز والتطوير -->
+            <div class="pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-slate-500">
+                <div>
+                    جميع الحقوق محفوظة &copy; منصة إنجاز الجامعية &bull; بالتنظيم والإصرار تصنع تفوقك 🚀
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold">
+                        الوضع الافتراضي: الفاتح ☀️
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- صندوق الإشعار المنبثق الداخلي (Toast) كبديل راقٍ لـ alert() -->
+    <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 max-w-md w-[92%] sm:w-auto z-50 pointer-events-none opacity-0 translate-y-8 transition-all duration-300">
+        <div id="toastContent" class="bg-white dark:bg-cardDark text-slate-800 dark:text-slate-100 px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-200 dark:border-borderDark flex items-center gap-3">
+            <span id="toastIcon" class="text-2xl shrink-0">🔔</span>
+            <div class="flex-1">
+                <h4 id="toastTitle" class="text-xs font-bold text-slate-400 dark:text-slate-400">تنبيه ذكي</h4>
+                <p id="toastMessage" class="text-sm font-semibold leading-snug">نص الإشعار يظهر هنا</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التلميح الإداري العائمة بتأثيرات بصرية وانسيابية فائقة -->
+    <aside id="startupBanner" 
+           class="fixed bottom-5 sm:bottom-7 right-4 sm:right-7 z-40 max-w-md w-[calc(100%-2rem)] sm:w-[410px] rounded-3xl bg-gradient-to-br from-indigo-700/95 via-brand-700/95 to-blue-800/95 dark:from-indigo-950/95 dark:via-brand-950/95 dark:to-slate-900/95 backdrop-blur-xl border border-white/20 text-white shadow-2xl shadow-brand-900/35 p-5 transition-all floating-hint-enter floating-bobbing" 
+           role="complementary" 
+           aria-label="تلميح إداري وتحفيزي عائم">
+        
+        <!-- خلفية زخرفية ناعمة -->
+        <div class="absolute -right-8 -bottom-8 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+        <div class="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-indigo-400/20 blur-lg pointer-events-none"></div>
+
+        <div class="relative z-10 space-y-3.5">
+            <!-- الشريط العلوي للتلميح مع زر الإغلاق الانسيابي -->
+            <div class="flex items-center justify-between gap-2 border-b border-white/15 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-base shrink-0 shadow-xs">
+                        💡
+                    </span>
+                    <div>
+                        <span id="tipCategory" class="text-[11px] font-bold tracking-wide uppercase bg-white/25 px-2.5 py-0.5 rounded-full text-indigo-50 inline-block">
+                            توجيه أكاديمي وإداري
+                        </span>
+                    </div>
+                </div>
+
+                <!-- زر الإغلاق الأنيق مع حركة تفاعلية -->
+                <button onclick="closeFloatingHint()" 
+                        title="إغلاق التلميح" 
+                        class="w-7 h-7 rounded-xl bg-white/15 hover:bg-white/30 active:scale-90 text-white/90 hover:text-white flex items-center justify-center transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- نص التلميح المتجدد مع انتقال ناعم -->
+            <p id="tipText" class="text-xs sm:text-sm font-semibold leading-relaxed text-indigo-50 transition-opacity duration-200">
+                جاري تهيئة تلميحك الإداري...
+            </p>
+
+            <!-- أزرار الإجراءات السريعة داخل البطاقة العائمة -->
+            <div class="flex items-center justify-between gap-2 pt-1">
+                <button onclick="displayNextHint()" 
+                        class="text-xs font-semibold px-3 py-1.5 bg-white/15 hover:bg-white/25 active:scale-95 border border-white/20 rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
+                    <span>🔄</span>
+                    <span>تلميح آخر</span>
+                </button>
+
+                <button onclick="closeFloatingHint()" 
+                        class="text-xs font-bold px-3.5 py-1.5 bg-white text-brand-700 hover:bg-indigo-50 active:scale-95 rounded-xl shadow-md transition-all flex items-center gap-1">
+                    <span>فهمت ذلك</span>
+                    <span>✓</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- زر مصغر عائم لإعادة فتح التلميح في حال قام المستخدم بإغلاقه -->
+    <button id="reopenHintBtn" 
+            onclick="reopenFloatingHint()" 
+            title="عرض نصيحة وتلميح إداري"
+            class="hidden fixed bottom-5 sm:bottom-7 right-4 sm:right-7 z-40 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-xs shadow-xl shadow-brand-600/30 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-white/20 group">
+        <span class="text-base group-hover:rotate-12 transition-transform">💡</span>
+        <span>تلميح اليوم</span>
+    </button>
+
     <script>
-        let productsData = [
-            { id: 1, name: 'عصير', category: 'cold', categoryName: 'مشروبات باردة', price: 15, image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=150' },
-            { id: 2, name: 'سموذي', category: 'cold', categoryName: 'مشروبات باردة', price: 20, image: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=150' },
-            { id: 3, name: 'موهيتو', category: 'cold', categoryName: 'مشروبات باردة', price: 20, image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=150' },
-            { id: 4, name: 'فرابتشينو', category: 'cold', categoryName: 'مشروبات باردة', price: 20, image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=150' },
-            { id: 5, name: 'ملك شيك', category: 'cold', categoryName: 'مشروبات باردة', price: 20, image: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=150' },
-            { id: 6, name: 'ايس', category: 'cold', categoryName: 'مشروبات باردة', price: 20, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=150' },
-            { id: 7, name: 'طاقة', category: 'cold', categoryName: 'مشروبات باردة', price: 30, image: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=150' },
-            { id: 8, name: 'شاي', category: 'hot', categoryName: 'مشروبات ساخنة', price: 5, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=150' },
-            { id: 9, name: 'نس كافيه', category: 'hot', categoryName: 'مشروبات ساخنة', price: 7, image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=150' },
-            { id: 10, name: 'قهوه تركية', category: 'hot', categoryName: 'مشروبات ساخنة', price: 10, image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=150' },
-            { id: 11, name: 'قهوه اسبريسو', category: 'hot', categoryName: 'مشروبات ساخنة', price: 15, image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=150' },
-            { id: 12, name: 'كافي لاتيه', category: 'hot', categoryName: 'مشروبات ساخنة', price: 20, image: 'https://images.unsplash.com/photo-1561882468-9110e53a3b78?w=150' },
-            { id: 13, name: 'كافي موكا', category: 'hot', categoryName: 'مشروبات ساخنة', price: 20, image: 'https://images.unsplash.com/photo-1578314675249-a6919f3cbcae?w=150' },
-            { id: 14, name: 'سبانش لاتيه', category: 'hot', categoryName: 'مشروبات ساخنة', price: 20, image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=150' },
-            { id: 15, name: 'هوت ...', category: 'hot', categoryName: 'مشروبات ساخنة', price: 20, image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=150' },
-            { id: 16, name: 'كراميل مكياتو', category: 'hot', categoryName: 'مشروبات ساخنة', price: 20, image: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=150' },
-            { id: 17, name: 'امريكانو', category: 'hot', categoryName: 'مشروبات ساخنة', price: 10, image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=150' },
-            { id: 18, name: 'كريب', category: 'dessert', categoryName: 'الحلويات والكيك', price: 25, image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=150' },
-            { id: 19, name: 'تشيز كيك', category: 'dessert', categoryName: 'الحلويات والكيك', price: 10, image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=150' },
-            { id: 20, name: 'كيك الهبة', category: 'dessert', categoryName: 'الحلويات والكيك', price: 20, image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150' },
-            { id: 21, name: 'قشطوطة', category: 'dessert', categoryName: 'الحلويات والكيك', price: 15, image: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=150' },
-            { id: 22, name: 'دبي بومب', category: 'dessert', categoryName: 'الحلويات والكيك', price: 15, image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150' },
-            { id: 23, name: 'بمبوظة', category: 'dessert', categoryName: 'الحلويات والكيك', price: 15, image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=150' },
-            { id: 24, name: 'كركوبة', category: 'dessert', categoryName: 'الحلويات والكيك', price: 10, image: 'https://images.unsplash.com/photo-1582716401301-b2447dc7407b?w=150' },
-            { id: 25, name: 'قطعة كيك', category: 'dessert', categoryName: 'الحلويات والكيك', price: 10, image: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=150' },
-            { id: 26, name: 'قالب صغير', category: 'dessert', categoryName: 'الحلويات والكيك', price: 50, image: 'https://images.unsplash.com/photo-1535141192574-5d4897c13136?w=150' },
-            { id: 27, name: 'قالب وسط', category: 'dessert', categoryName: 'الحلويات والكيك', price: 70, image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=150' },
-            { id: 28, name: 'قالب كبير', category: 'dessert', categoryName: 'الحلويات والكيك', price: 100, image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150' },
-            { id: 29, name: 'بلاطة كاملة', category: 'dessert', categoryName: 'الحلويات والكيك', price: 200, image: 'https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=150' },
-            { id: 30, name: 'كيك 3 طوابق', category: 'dessert', categoryName: 'الحلويات والكيك', price: 300, image: 'https://images.unsplash.com/photo-1542826438-bd32f43d626f?w=150' }
+        /* ========================================================
+           قاعدة بيانات التلميحات الإدارية والأكاديمية والتحفيزية
+           (تظهر نصيحة مختلفة تشجيعية عند كل تشغيل للتطبيق)
+        ======================================================== */
+        const startupWisdomList = [
+            {
+                category: "إدارة الوقت والأولويات",
+                text: "طبق قاعدة 20/80 (باريتو): 20% من المواد والواجبات الهامة تحقق 80% من نتائجك وتفوقك الفصلي."
+            },
+            {
+                category: "تقنية دراسية فعالة",
+                text: "استخدم تقنية الاسترجاع النشط (Active Recall): اختبر نفسك بالأسئلة بدلاً من مجرد إعادة قراءة الملخصات."
+            },
+            {
+                category: "علم الإنجاز والتغلب على التسويف",
+                text: "قاعدة الخمس ثوانٍ: عندما تشعر بالتردد في بدء المذاكرة، عد تنازلياً 5-4-3-2-1 وابدأ فوراً بدون مفاوضة عقلك."
+            },
+            {
+                category: "توازن الطاقة والتركيز",
+                text: "تقنية بومودورو: ذاكر بتركيز تام لمدة 25 دقيقة، ثم خذ استراحة 5 دقائق لتجديد طاقتك الذهنية."
+            },
+            {
+                category: "تحفيز وإرادة",
+                text: "التعب يزول والدرجات والتفوق يبقى أثره. كل ساعة استثمار تقضيها اليوم تبني مستقبلك المهني غداً."
+            },
+            {
+                category: "مصفوفة آيزنهاور",
+                text: "فرّق دائماً بين 'العاجل' و'المهم'. لا تجعل الواجبات تتراكم حتى تتحول جميعها إلى حالات طوارئ مضغوطة."
+            },
+            {
+                category: "التفكير الاستراتيجي الجامعي",
+                text: "احرص على إنهاء متطلبات الأسبوع قبل عطلة نهاية الأسبوع لتستمتع براحة ذهنية حقيقية دون وخز الضمير."
+            },
+            {
+                category: "شحذ الهمة",
+                text: "أفضل طريقة للبدء هي التوقف عن الكلام والبدء في العمل. افتح دفترك الآن واخطُ الخطوة الأولى!"
+            }
         ];
 
-        function renderProducts() {
-            const grid = document.getElementById('products-grid');
-            const tableBody = document.querySelector('#menu-table tbody');
-            
-            grid.innerHTML = '';
-            tableBody.innerHTML = '';
+        /* عبارات التحفيز الفورية عند إتمام كل مهمة */
+        const completionCheerQuotes = [
+            "عمل استثنائي! خطوة جبارة تقربك من معدلك المستهدف 🎓🌟",
+            "مهمة أُغلقت بنجاح! طاقة إنجازك اليوم تثير الإعجاب 💪✨",
+            "رائع جداً! استمر بهذا الزخم؛ النجاح عادة وليس صدفة 🚀",
+            "أحسنت صنعاً! خذ استراحة قصيرة، فالعقل المتجدد أسرع في الاستيعاب ☕",
+            "بطل! إنجازك لهذه المهمة يزيل عبئاً كبيراً عن كاهلك.. إلى الأمام 🎯"
+        ];
 
-            productsData.forEach(prod => {
-                grid.innerHTML += `
-                    <div class="product-card" data-category="${prod.category}">
-                        <img src="${prod.image}" alt="${prod.name}" class="product-img">
-                        <h4 style="font-size: 15px; margin-bottom: 5px;">${prod.name}</h4>
-                        <p style="color: var(--accent-color); font-weight: bold; margin-bottom: 10px;">${prod.price} شيقل</p>
-                        <button class="btn-action btn-edit" onclick="makeOrder('${prod.name}')">طلب للطاولة</button>
-                    </div>
-                `;
+        /* ========================================================
+           حالة التطبيق العامة وتخزين البيانات
+        ======================================================== */
+        let tasks = [];
+        let currentFilter = 'all';
+        let soundEnabled = true;
+        let audioCtx = null;
+        let clockTimer = null;
 
-                tableBody.innerHTML += `
-                    <tr>
-                        <td><img src="${prod.image}" alt="${prod.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"></td>
-                        <td>${prod.name}</td>
-                        <td>${prod.categoryName}</td>
-                        <td>${prod.price} شيقل</td>
-                        <td>
-                            <button class="btn-action btn-edit" onclick="editProduct(${prod.id})">تعديل</button>
-                            <button class="btn-action btn-delete" onclick="deleteProduct(${prod.id})">حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            renderCurrentDate();
+            loadStoredTasks();
+            displayNextHint();
+            renderTaskList();
+            updateStats();
+            startLiveClockAndReminders();
+        });
+
+        function renderCurrentDate() {
+            const dateElem = document.getElementById('currentDateDisplay');
+            if (!dateElem) return;
+            try {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateElem.innerText = now.toLocaleDateString('ar-EG', options);
+            } catch (e) {
+                dateElem.innerText = new Date().toLocaleDateString();
+            }
         }
 
-        window.onload = function() {
-            renderProducts();
-        };
+        /* إدارة السمة مع تأكيد الوضع الفاتح (Light Mode) كوضع افتراضي رئيسي */
+        function loadTheme() {
+            // اعتماد الوضع الفاتح كافتراضي إذا لم يتم حفظ اختيار مسبق
+            const savedTheme = localStorage.getItem('unitask_theme') || 'light';
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
 
-        function openAddProductModal() {
-            let name = prompt('أدخل اسم المنتج/الخدمة الجديدة:');
-            let categoryKey = prompt('اختر التصنيف (hot للمشروبات الساخنة، cold للمشروبات الباردة، dessert للحلويات والكيك):');
-            let price = prompt('أدخل السعر (شيقل):');
-            let image = prompt('رابط الصورة (URL) أو اتركه فارغاً للافتراضي:', 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150');
-
-            if (name && price && (categoryKey === 'hot' || categoryKey === 'cold' || categoryKey === 'dessert')) {
-                let catName = categoryKey === 'hot' ? 'مشروبات ساخنة' : (categoryKey === 'cold' ? 'مشروبات باردة' : 'الحلويات والكيك');
-                productsData.push({
-                    id: Date.now(),
-                    name: name,
-                    category: categoryKey,
-                    categoryName: catName,
-                    price: parseFloat(price),
-                    image: image || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150'
-                });
-                renderProducts();
-                alert('تمت إضافة المنتج بنجاح!');
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                if (icon) icon.innerText = '☀️';
+                if (text) text.innerText = 'الوضع الفاتح';
             } else {
-                alert('البيانات المدخلة غير صحيحة.');
+                // تأكيد الوضع الفاتح كإعداد افتراضي
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('unitask_theme', 'light');
+                if (icon) icon.innerText = '🌙';
+                if (text) text.innerText = 'الوضع الليلي';
             }
-        }
-
-        function editProduct(id) {
-            let prod = productsData.find(p => p.id === id);
-            if (!prod) return;
-
-            let newName = prompt('تعديل الاسم:', prod.name);
-            let newPrice = prompt('تعديل السعر (شيقل):', prod.price);
-            let newImg = prompt('رابط الصورة الجديد (URL):', prod.image);
-
-            if (newName && newPrice) {
-                prod.name = newName;
-                prod.price = parseFloat(newPrice);
-                if (newImg) prod.image = newImg;
-                renderProducts();
-                alert('تم التعديل بنجاح!');
-            }
-        }
-
-        function deleteProduct(id) {
-            if (confirm('هل أنت متأكد من حذف هذا المنتج من القائمة؟')) {
-                productsData = productsData.filter(p => p.id !== id);
-                renderProducts();
-            }
-        }
-
-        function switchSection(sectionId, btn) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('aside button').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(sectionId).classList.add('active');
-            btn.classList.add('active');
         }
 
         function toggleTheme() {
             const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            html.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            const isDark = html.classList.contains('dark');
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('unitask_theme', 'light');
+                icon.innerText = '🌙';
+                text.innerText = 'الوضع الليلي';
+                showToast('تم تفعيل الوضع الفاتح (الافتراضي)', 'المظهر', '☀️');
+            } else {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                localStorage.setItem('unitask_theme', 'dark');
+                icon.innerText = '☀️';
+                text.innerText = 'الوضع الفاتح';
+                showToast('تم تفعيل الوضع الليلي', 'المظهر', '🌙');
+            }
         }
 
-        let currentLang = 'ar';
-        function toggleLang() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-            document.documentElement.setAttribute('lang', currentLang);
-            alert(currentLang === 'ar' ? 'تم التبديل إلى اللغة العربية' : 'Switched to English');
+        function displayNextHint() {
+            const index = Math.floor(Math.random() * startupWisdomList.length);
+            const chosen = startupWisdomList[index];
+            const catElem = document.getElementById('tipCategory');
+            const textElem = document.getElementById('tipText');
+
+            if (!catElem || !textElem) return;
+
+            // تلاشٍ سريع ومريح عند استبدال النص
+            textElem.style.opacity = '0';
+            setTimeout(() => {
+                catElem.innerText = chosen.category;
+                textElem.innerText = chosen.text;
+                textElem.style.opacity = '1';
+            }, 160);
         }
 
-        function filterCategory(category, btn) {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        /* إغلاق التلميح العائم بحركة انسيابية هابطة */
+        function closeFloatingHint() {
+            const banner = document.getElementById('startupBanner');
+            if (!banner || banner.classList.contains('floating-hint-exit')) return;
 
-            const products = document.querySelectorAll('.product-card');
-            products.forEach(product => {
-                if (category === 'all' || product.getAttribute('data-category') === category) {
-                    product.style.display = 'flex';
-                } else {
-                    product.style.display = 'none';
+            banner.classList.remove('floating-bobbing');
+            banner.classList.remove('floating-hint-enter');
+            banner.classList.add('floating-hint-exit');
+
+            setTimeout(() => {
+                banner.classList.add('hidden');
+                banner.classList.remove('floating-hint-exit');
+                const reopenBtn = document.getElementById('reopenHintBtn');
+                if (reopenBtn) {
+                    reopenBtn.classList.remove('hidden');
+                    reopenBtn.classList.add('animate-enter');
                 }
+            }, 380);
+        }
+
+        /* إعادة إظهار التلميح العائم بحركة صاعدة مريحة */
+        function reopenFloatingHint() {
+            const banner = document.getElementById('startupBanner');
+            const reopenBtn = document.getElementById('reopenHintBtn');
+
+            if (reopenBtn) reopenBtn.classList.add('hidden');
+            if (!banner) return;
+
+            displayNextHint();
+            banner.classList.remove('hidden');
+            banner.classList.remove('floating-hint-exit');
+            banner.classList.add('floating-hint-enter');
+
+            setTimeout(() => {
+                banner.classList.add('floating-bobbing');
+            }, 550);
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                if (icon) icon.innerText = '🔔';
+                if (text) text.innerText = 'الصوت مُفعل';
+                showToast('تم تفعيل التنبيهات الصوتية', 'إعدادات الصوت', '🔔');
+                playChime('start');
+            } else {
+                if (icon) icon.innerText = '🔕';
+                if (text) text.innerText = 'الصوت مكتوم';
+                showToast('تم كتم التنبيهات الصوتية', 'إعدادات الصوت', '🔕');
+            }
+        }
+
+        function playChime(type = 'start') {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'complete') {
+                    // نغمة نجاح احتفالية متدرجة
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (type === 'deadline') {
+                    // نغمة تنبيه مهلة الإنجاز
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.setValueAtTime(330, now + 0.15);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else {
+                    // نغمة هادئة لبدء المذاكرة
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.setValueAtTime(880, now + 0.12);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                // تجاوز هادئ في حال تقييد الصوت من المتصفح
+            }
+        }
+
+        function loadStoredTasks() {
+            const stored = localStorage.getItem('unitask_items');
+            if (stored) {
+                try {
+                    tasks = JSON.parse(stored);
+                } catch (e) {
+                    tasks = [];
+                }
+            } else {
+                // مهام نموذجية استرشادية للبداية
+                tasks = [
+                    {
+                        id: 'task-demo-1',
+                        title: 'مراجعة ومناقشة تقرير مشروع التخرج',
+                        course: 'مشروع التخرج',
+                        startTime: '09:00',
+                        endTime: '11:00',
+                        priority: 'high',
+                        completed: false,
+                        notifiedStart: true,
+                        notifiedEnd: false
+                    },
+                    {
+                        id: 'task-demo-2',
+                        title: 'حل واجب تحليل وتصميم الخوارزميات (المسألة 4 و 5)',
+                        course: 'خوارزميات 2',
+                        startTime: '13:30',
+                        endTime: '15:00',
+                        priority: 'medium',
+                        completed: false,
+                        notifiedStart: false,
+                        notifiedEnd: false
+                    }
+                ];
+                saveTasks();
+            }
+        }
+
+        function saveTasks() {
+            localStorage.setItem('unitask_items', JSON.stringify(tasks));
+        }
+
+        function handleAddTask(event) {
+            event.preventDefault();
+
+            const titleInput = document.getElementById('taskTitle');
+            const courseInput = document.getElementById('taskCourse');
+            const startInput = document.getElementById('taskStartTime');
+            const endInput = document.getElementById('taskEndTime');
+            const priorityInput = document.getElementById('taskPriority');
+
+            const title = titleInput.value.trim();
+            const course = courseInput.value.trim() || 'عام / جامعي';
+            const startTime = startInput.value;
+            const endTime = endInput.value;
+            const priority = priorityInput.value;
+
+            if (!title || !startTime || !endTime) return;
+
+            // التحقق من أن وقت النهاية بعد وقت البداية
+            if (endTime <= startTime) {
+                showToast('تنبيه: يُفضل أن يكون وقت نهاية المهمة لاحقاً لوقت بدايتها!', 'ملاحظة زمنية', '⚠️');
+            }
+
+            const newTask = {
+                id: 'task-' + Date.now(),
+                title: title,
+                course: course,
+                startTime: startTime,
+                endTime: endTime,
+                priority: priority,
+                completed: false,
+                notifiedStart: false,
+                notifiedEnd: false
+            };
+
+            tasks.push(newTask);
+            saveTasks();
+            renderTaskList();
+            updateStats();
+
+            // تفريغ المدخلات بعد الإضافة
+            titleInput.value = '';
+            courseInput.value = '';
+            
+            showToast(`تم جدولتها من ${startTime} حتى ${endTime}`, 'أُضيفت المهمة بنجاح', '📅');
+            playChime('start');
+        }
+
+        function toggleTaskCompletion(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            task.completed = !task.completed;
+            saveTasks();
+            renderTaskList();
+            updateStats();
+
+            if (task.completed) {
+                // إطلاق تأثير القصاصات الملونة (Confetti) احتفالاً بالإنجاز
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.75 }
+                    });
+                }
+                
+                playChime('complete');
+                const randomCheer = completionCheerQuotes[Math.floor(Math.random() * completionCheerQuotes.length)];
+                showToast(randomCheer, 'إنجاز رائع!', '🎉');
+            }
+        }
+
+        function deleteTask(taskId) {
+            tasks = tasks.filter(t => t.id !== taskId);
+            saveTasks();
+            renderTaskList();
+            updateStats();
+            showToast('تم حذف المهمة من جدولك اليومي', 'تم الحذف', '🗑️');
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            const buttons = {
+                all: document.getElementById('filterAll'),
+                pending: document.getElementById('filterPending'),
+                completed: document.getElementById('filterCompleted')
+            };
+
+            Object.keys(buttons).forEach(key => {
+                if (key === filterType) {
+                    buttons[key].className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-cardDark text-slate-900 dark:text-white shadow-xs font-bold transition';
+                } else {
+                    buttons[key].className = 'px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition';
+                }
+            });
+
+            renderTaskList();
+        }
+
+        function renderTaskList() {
+            const container = document.getElementById('tasksContainer');
+            const emptyState = document.getElementById('emptyState');
+            container.innerHTML = '';
+
+            let filtered = tasks;
+            if (currentFilter === 'pending') {
+                filtered = tasks.filter(t => !t.completed);
+            } else if (currentFilter === 'completed') {
+                filtered = tasks.filter(t => t.completed);
+            }
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // ترتيب المهام حسب وقت البداية
+            const sortedTasks = [...filtered].sort((a, b) => a.startTime.localeCompare(b.startTime));
+            const currentTimeStr = getCurrentTimeString();
+
+            sortedTasks.forEach(task => {
+                const isOngoing = !task.completed && (currentTimeStr >= task.startTime && currentTimeStr <= task.endTime);
+                
+                // الألوان حسب الأولوية
+                let priorityBadge = '';
+                if (task.priority === 'high') {
+                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300">أولوية قصوى</span>';
+                } else if (task.priority === 'medium') {
+                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">أولوية متوسطة</span>';
+                } else {
+                    priorityBadge = '<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">مرنة</span>';
+                }
+
+                const li = document.createElement('li');
+                li.className = `p-4 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    task.completed
+                        ? 'bg-slate-50/80 dark:bg-cardDark/40 border-slate-200 dark:border-borderDark opacity-65'
+                        : isOngoing
+                        ? 'bg-white dark:bg-cardDark border-brand-500 shadow-md shadow-brand-500/10 ring-1 ring-brand-500/30'
+                        : 'bg-white dark:bg-cardDark border-slate-200 dark:border-borderDark shadow-xs hover:shadow-md'
+                }`;
+
+                li.innerHTML = `
+                    <div class="flex items-start sm:items-center gap-3.5 flex-1">
+                        <!-- زر الإنجاز الدائري -->
+                        <button onclick="toggleTaskCompletion('${task.id}')" title="${task.completed ? 'إلغاء الإنجاز' : 'تعليم كمكتمل'}"
+                                class="mt-1 sm:mt-0 w-7 h-7 rounded-xl border-2 flex items-center justify-center shrink-0 transition-transform active:scale-90 ${
+                                    task.completed 
+                                    ? 'bg-emeraldCustom border-emeraldCustom text-white' 
+                                    : 'border-slate-300 dark:border-slate-600 hover:border-brand-500'
+                                }">
+                            ${task.completed ? '<svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                        </button>
+
+                        <div class="flex-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
+                                    ${task.title}
+                                </h3>
+                                ${priorityBadge}
+                                ${isOngoing ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-500 text-white animate-pulse">جارية الآن ⏳</span>' : ''}
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-medium">
+                                    📚 ${task.course}
+                                </span>
+                                <span class="font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                                    <span class="text-emerald-500 font-bold">بدء:</span> ${task.startTime}
+                                    <span class="text-slate-300 dark:text-slate-600">|</span>
+                                    <span class="text-rose-500 font-bold">نهاية:</span> ${task.endTime}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أزرار الإجراءات السريعة -->
+                    <div class="flex items-center justify-end gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-borderDark">
+                        <button onclick="toggleTaskCompletion('${task.id}')" class="text-xs px-3 py-1.5 rounded-xl font-semibold border ${
+                            task.completed
+                            ? 'border-slate-200 dark:border-borderDark text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100'
+                        } transition">
+                            ${task.completed ? 'إرجاع للمتبقي' : 'تم الإنجاز ✓'}
+                        </button>
+                        <button onclick="deleteTask('${task.id}')" title="حذف المهمة"
+                                class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(li);
             });
         }
 
-        let visitorCount = 128;
-        function makeOrder(productName) {
-            const tableNum = document.getElementById('table-number').value;
-            visitorCount++;
-            document.getElementById('visitor-count-display').innerText = visitorCount;
-            alert(`تم تسجيل طلب (${productName}) بنجاح للطاولة رقم: ${tableNum}`);
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const pending = total - completed;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statCompleted').innerText = completed;
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statPercentText').innerText = percent + '%';
+            document.getElementById('statProgressBar').style.width = percent + '%';
         }
 
-        function incrementVisitor() {
-            visitorCount++;
-            document.getElementById('visitor-count-display').innerText = visitorCount;
-            alert('تم تسجيل دخول زبون جديد بنجاح.');
+        function getCurrentTimeString() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            return `${h}:${m}`;
         }
 
-        function deleteRow(button) {
-            const row = button.closest('tr');
-            if (confirm('هل أنت متأكد من الحذف؟')) {
-                row.remove();
-            }
+        function startLiveClockAndReminders() {
+            if (clockTimer) clearInterval(clockTimer);
+
+            const checkAndTick = () => {
+                const timeStr = getCurrentTimeString();
+                const clockElem = document.getElementById('activeClock');
+                if (clockElem) {
+                    clockElem.innerText = `الوقت الحالي: ${timeStr}`;
+                }
+
+                // فحص مواعيد بدء وانتهاء المهام للتذكير
+                let updated = false;
+
+                tasks.forEach(task => {
+                    if (!task.completed) {
+                        // تذكير وقت البداية
+                        if (task.startTime === timeStr && !task.notifiedStart) {
+                            showToast(`حان الآن موعد البدء بمهمة: "${task.title}" (${task.course})`, 'تذكير بدء المهمة ⏰', '🎯');
+                            playChime('start');
+                            task.notifiedStart = true;
+                            updated = true;
+                        }
+                        // تذكير وقت النهاية
+                        if (task.endTime === timeStr && !task.notifiedEnd) {
+                            showToast(`شارف الوقت المخصص لمهمة: "${task.title}" على الانتهاء!`, 'تنبيه المهلة ⏳', '⚠️');
+                            playChime('deadline');
+                            task.notifiedEnd = true;
+                            updated = true;
+                        }
+                    }
+                });
+
+                if (updated) {
+                    saveTasks();
+                    renderTaskList();
+                }
+            };
+
+            checkAndTick();
+            clockTimer = setInterval(checkAndTick, 10000); // فحص مستمر كل 10 ثوانٍ
         }
 
-        function openFinanceModal() {
-            let desc = prompt('أدخل وصف الحركة المالية (مثال: شراء بن، رواتب، مبيعات):');
-            let type = prompt('النوع (وارد أو صادر):');
-            let amount = prompt('أدخل المبلغ (شيقل):');
-            let date = prompt('التاريخ (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+        let toastTimeout = null;
+        function showToast(message, title = 'إشعار جامعي', icon = '🔔') {
+            const toast = document.getElementById('toastBox');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
 
-            if (desc && amount && (type === 'وارد' || type === 'صادر')) {
-                const tbody = document.querySelector('#finance-table tbody');
-                const newRow = document.createElement('tr');
-                let typeBadge = type === 'وارد' ? '<span style="color: #27ae60; font-weight: bold;">وارد 📥</span>' : '<span style="color: #e74c3c; font-weight: bold;">صادر 📤</span>';
-                
-                newRow.innerHTML = `
-                    <td>${desc}</td>
-                    <td>${typeBadge}</td>
-                    <td>${amount} شيقل</td>
-                    <td>${date || '-'}</td>
-                    <td>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                    </td>
-                `;
-                tbody.appendChild(newRow);
-                alert('تمت إضافة الحركة المالية بنجاح!');
-            } else {
-                alert('البيانات المدخلة غير صحيحة.');
-            }
-        }
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+            toastIcon.innerText = icon;
 
-        function editTask(button) {
-            alert('نافذة تعديل المهمة');
-        }
+            toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
 
-        function openTaskModal() {
-            let taskName = prompt('أدخل اسم المهمة الجديدة:');
-            let empName = prompt('الموظف المسؤول:');
-            let startDate = prompt('تاريخ البداية (YYYY-MM-DD HH:MM):');
-            let endDate = prompt('تاريخ النهاية (YYYY-MM-DD HH:MM):');
-            
-            if(taskName && empName) {
-                const tbody = document.querySelector('#tasks-table tbody');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${taskName}</td>
-                    <td>${empName}</td>
-                    <td>${startDate || '-'}</td>
-                    <td>${endDate || '-'}</td>
-                    <td>جديدة</td>
-                    <td>
-                        <button class="btn-action btn-edit" onclick="editTask(this)">تعديل</button>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                    </td>
-                `;
-                tbody.appendChild(newRow);
-            }
-        }
-
-        function openFeedbackModal() {
-            let custName = prompt('اسم الزبون:');
-            let tableNum = prompt('رقم الطاولة:');
-            let type = prompt('النوع (شكوى / رأي إيجابي):');
-            let comment = prompt('نص التعليق أو الشكوى:');
-
-            if(custName && comment) {
-                const tbody = document.querySelector('#feedback-table tbody');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${custName}</td>
-                    <td>${tableNum || '-'}</td>
-                    <td>${type || 'رأي'}</td>
-                    <td>${comment}</td>
-                    <td>
-                        <button class="btn-action btn-delete" onclick="deleteRow(this)">حذف</button>
-                    </td>
-                `;
-                tbody.appendChild(newRow);
-            }
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+            }, 4500);
         }
     </script>
 </body>
